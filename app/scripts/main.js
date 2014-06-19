@@ -14,19 +14,9 @@ $("input").blur(function(){
 });
 
 
-$(".btn-default").click(function(){
-$.getJSON( "json_exemple.js", function( data,textStatus ) {
-  var items = [];
-  $.each( data, function( key, val ) {
-    items.push( "<li id='" + key + "'>" + val + "</li>" );
-  });
- 
-  $( "<ul/>", {
-    "class": "my-new-list",
-    html: items.join( "" )
-  }).appendTo( "#mainPanel" );
-alert(textStatus);
-});
+$("#bAddObject").click(function(){
+var inp = "<span class='input-group-addon'>@</span>  <input type='text' class='form-control' placeholder='Username'>";
+$("#ig1").append(inp);
 });
 
 $("#inputSuccess2").on('input',function(){
