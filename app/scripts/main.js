@@ -1,25 +1,9 @@
 console.log('\'Allo \'Allo!');
 
 $(document).ready(function(){
-  $(".btn-danger").click(function(){
-   // $("#inputSuccess2").hide(1000);
-  });
-
-  $(".btn-success").click(function(){
-    //$("#inputSuccess2").show();
-  });
 
 $("input").focus(function(){
   $(this).css("background-color","#cccccc");
-});
-
-$("#flip").click(function(){
-  $("#mainPanel").slideToggle();
-if($("#flip").text() == 'Show') {
-        $(this).text('Hide');
-    } else {
-        $(this).text('Show');
-    }
 });
 
 $("input").blur(function(){
@@ -42,32 +26,62 @@ alert(textStatus);
 });
 });
 
+$("#bChange").click(function(){
+	var iId = 1;
+	var strId = "#rate" + iId;
+	var cRate = $("#rate1").text();
+	$("#inputSuccess2").val(cRate);	
+});
 
-var getExRate = function(){
-//  var flickerAPI = "json_exemple.js";
-var flickerAPI = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20in%20(%22EURUSD%22%2C%22GBPUSD%22)&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
-  $.getJSON( flickerAPI, {
-    tags: "test yahoo",
-    tagmode: "any",
-    format: "json"
-  })
-    	.done(function( data ) {
+
+var displayArr = function(arr,loc){
 		var items = [];
-items.push( "<p id='" + "rate" + "'>" + data.query.results.rate[0].Name + " : " + data.query.results.rate[0].Rate + "</p>" );
-	      	//$.each( data, function( key, val ) {
-	    	//	items.push( "<li id='" + key + "'>" + key + " : " + val.results.rate[0].Rate + "</li>" );
-	  	//});
+		var iId = 1;
+		var strId = "rate" + iId;
+		var strKeyId = "rateKey" + iId;
+		$.each(arr, function(key,val){
+			items.push( "<p><label id='" + strKeyId + "'>" + key + "</label> : <label id='" + strId + "'>" + val + "</label></p>" );
+			iId = iId+1;
+			strId = "rate" + iId;
+		});
 	 
 	  	$( "<div/>", {
 	    		"class": "my-new-list",
 	    		html: items.join( "" )
-	  	}).appendTo( "#mainPanel" );
-    	})
-  	.fail(function() {
-    		console.log( "error" );
-  	});
+	  	}).appendTo( loc );
 };
 
-getExRate()
+var getExRate = function(arrayCur){
+	//String Currency Construction
+	var stringCur = "";
+	var nbCur = arrayCur.length;
+	$.each(arrayCur, function(key,value){
+		stringCur = stringCur + "%22" + value + "%22";
+		if(key+1 != nbCur){
+			stringCur = stringCur + "%2C";
+		}
+	});
+
+	//Call to Yahoo Finances
+	var flickerAPI = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20in%20("+stringCur+")&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
+	  $.getJSON( flickerAPI, {
+	    tags: "test yahoo",
+	    tagmode: "any",
+	    format: "json"
+	  })
+	    	.done(function( data ) {
+			var rates = {};
+			$.each(data.query.results.rate, function(i,val){
+				rates[val.Name] = val.Rate
+			});
+			displayArr(rates,"#mainPanel");
+	    	})
+	  	.fail(function() {
+	    		console.log( "error" );
+			return false;
+	  	});
+};
+
+getExRate(["EURUSD","VEFUSD","USDCOP","VEFCOP","USDVEF"]);
 
 });
