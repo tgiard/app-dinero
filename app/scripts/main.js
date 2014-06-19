@@ -26,11 +26,14 @@ alert(textStatus);
 });
 });
 
-$("#bChange").click(function(){
+$("#inputSuccess2").on('input',function(){
 	var iId = 1;
 	var strId = "#rate" + iId;
 	var cRate = $("#rate1").text();
-	$("#inputSuccess2").val(cRate);	
+	var cAmount = $("#inputSuccess2").val();
+	amountConv = cAmount*cRate;
+	amountConv = amountConv.toFixed(2);
+	$("#amountConv").text(amountConv);	
 });
 
 
@@ -72,7 +75,7 @@ var getExRate = function(arrayCur){
 	    	.done(function( data ) {
 			var rates = {};
 			$.each(data.query.results.rate, function(i,val){
-				rates[val.Name] = val.Rate
+				rates[val.id] = val.Rate
 			});
 			displayArr(rates,"#mainPanel");
 	    	})
@@ -83,5 +86,13 @@ var getExRate = function(arrayCur){
 };
 
 getExRate(["EURUSD","VEFUSD","USDCOP","VEFCOP","USDVEF"]);
+$.ajax({  
+  url: 'http://bolivarcucuta.com/',
+  type: 'GET',
+  dataType: 'html',
+  data: null,
+  success: 	function(html) {alert("success");
+		}
+});
 
 });
