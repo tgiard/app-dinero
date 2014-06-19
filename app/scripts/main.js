@@ -2,8 +2,11 @@ console.log('\'Allo \'Allo!');
 
 $(document).ready(function(){
 
+var rates = {};
+
 $("input").focus(function(){
   $(this).css("background-color","#cccccc");
+displayArr(rates,"#mainPanel");
 });
 
 $("input").blur(function(){
@@ -42,8 +45,9 @@ var displayArr = function(arr,loc){
 		var iId = 1;
 		var strId = "rate" + iId;
 		var strKeyId = "rateKey" + iId;
+		items.push(" --- ");
 		$.each(arr, function(key,val){
-			items.push( "<p><label id='" + strKeyId + "'>" + key + "</label> : <label id='" + strId + "'>" + val + "</label></p>" );
+			items.push( "<label id='" + strKeyId + "'>" + key + "</label> : <label id='" + strId + "'>" + val + "</label> --- " );
 			iId = iId+1;
 			strId = "rate" + iId;
 		});
@@ -51,7 +55,7 @@ var displayArr = function(arr,loc){
 	  	$( "<div/>", {
 	    		"class": "my-new-list",
 	    		html: items.join( "" )
-	  	}).appendTo( loc );
+	  	}).prependTo( loc );
 };
 
 var getExRate = function(arrayCur){
@@ -73,10 +77,9 @@ var getExRate = function(arrayCur){
 	    format: "json"
 	  })
 	    	.done(function( data ) {
-			var rates = {};
 			$.each(data.query.results.rate, function(i,val){
 				rates[val.id] = val.Rate
-			});
+			});			
 			displayArr(rates,"#mainPanel");
 	    	})
 	  	.fail(function() {
@@ -85,14 +88,17 @@ var getExRate = function(arrayCur){
 	  	});
 };
 
-getExRate(["EURUSD","VEFUSD","USDCOP","VEFCOP","USDVEF"]);
-$.ajax({  
-  url: 'http://bolivarcucuta.com/',
-  type: 'GET',
-  dataType: 'html',
-  data: null,
-  success: 	function(html) {alert("success");
-		}
-});
+getExRate(["EURUSD","USDVEF","USDCOP"]);
+
+
+
+//$.ajax({  
+//  url: 'http://bolivarcucuta.com/',
+//  type: 'GET',
+//  dataType: 'html',
+//  data: null,
+//  success: 	function(html) {alert("success");
+//		}
+//});
 
 });
