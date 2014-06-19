@@ -3,10 +3,11 @@ console.log('\'Allo \'Allo!');
 $(document).ready(function(){
 
 var rates = {};
+var nbPost = 0;
+var amountArr = [];
 
 $("input").focus(function(){
   $(this).css("background-color","#cccccc");
-displayArr(rates,"#mainPanel");
 });
 
 $("input").blur(function(){
@@ -15,11 +16,61 @@ $("input").blur(function(){
 
 
 $("#bAddObject").click(function(){
-var inp = "<span class='input-group-addon'>@</span>  <input type='text' class='form-control' placeholder='Username'>";
-$("#ig1").append(inp);
+
+var items = [];
+items.push("<p>");
+items.push("<select id='fromCur'>\
+  <option value='eur'>Avion</option>\
+  <option value='vef'>Cupo Viajero</option>\
+  <option value='usd'>Cupo Internet</option>\
+  <option value='usd'>Tarjeta de credito</option>\
+</select>");
+items.push("<select id='fromCur'>\
+  <option value='eur'>Oficial</option>\
+  <option value='vef'>Paralelo</option>\
+  <option value='usd'>Sicad</option>\
+  <option value='usd'>Sicad II</option>\
+</select>");
+items.push("</p>");
+items.push("<p>");
+items.push("<select id='fromCur'>\
+  <option value='eur'>Euro</option>\
+  <option value='vef'>BsF</option>\
+  <option value='usd'>Dolar</option>\
+</select>");
+items.push("<input type='text' id='1'></input>");
+items.push("</p>");
+items.push("<p>");
+items.push("<select id='toCur'>\
+  <option value='eur'>Euro</option>\
+  <option value='vef'>BsF</option>\
+  <option value='usd'>Dolar</option>\
+</select>");
+items.push("<input class='inputCur' type='text'></input>");
+items.push("<hr size='3' width='45'>");
+
+amountArr.push(0);
+
+		nbPost = nbPost + 1;
+		var strId = "post" + nbPost;
+	console.log(strId);
+	  	$( "<div/>", {
+			id : strId,
+			html : items.join("")
+	  	}).appendTo("#testPanel");
 });
 
 $("#inputSuccess2").on('input',function(){
+	var iId = 1;
+	var strId = "#rate" + iId;
+	var cRate = $("#rate1").text();
+	var cAmount = $("#inputSuccess2").val();
+	amountConv = cAmount*cRate;
+	amountConv = amountConv.toFixed(2);
+	$("#amountConv").text(amountConv);	
+});
+
+$(".inputCur").on(".inputCur",function(){
 	var iId = 1;
 	var strId = "#rate" + iId;
 	var cRate = $("#rate1").text();
