@@ -1,66 +1,93 @@
-console.log('\'Allo \'Allo!');
 
 $(document).ready(function(){
 
+
 var rates = {};
-var nbPost = 0;
+var nbPost = 1;
 var amountArr = [];
+var objects = ["Avion", "Cupe Viajero", "Cupo Internet", "Cupo Tarjeta Credito"];
+var types = ["Oficial", "Sicad", "Sicad II", "Paralelo"];
+var cur = ["BsF", "Euro", "USD"];
 
-$("input").focus(function(){
+var focusInput = function(){
   $(this).css("background-color","#cccccc");
-});
+};
 
-$("input").blur(function(){
+var blurInput = function(){
   $(this).css("background-color","#ffffff");
+};
+
+var changeInput = function(ob){
+console.log('ok');
+	var cAmount = $(ob).val();
+	var cId = $(ob).attr('id');
+	if($.isNumeric(cAmount)){
+		var cFromCur = $(".fromCur[target="+cId+"]").val();
+		var cToCur = $(".toCur[target="+cId+"]").val();
+		var cRate = rates[cFromCur+cToCur];
+		var cOutput = cAmount*cRate;
+		$(".outputAmount[target="+cId+"]").text(cOutput.toFixed(2));
+	}else{		
+		$(".outputAmount[target="+cId+"]").text('');
+	};
+};
+
+function removeRow(){
+	var par = $(this).parent().parent(); //tr
+	par.remove();
+	console.log('ok');	
+};
+
+var addRow = function(){
+	nbPost++;
+	var idStr = nbPost;
+	$("#inputTable tbody tr:first").clone().appendTo("#inputTable");
+	$("#inputTable tbody tr:last").find(".inputAmount").val('');
+	$("#inputTable tbody tr:last").find(".outputAmount").text('');
+	$("#inputTable tbody tr:last").find(".inputAmount").attr('id',nbPost);
+	$("#inputTable tbody tr:last").find(".outputAmount").attr('target',nbPost);
+	$("#inputTable tbody tr:last").find(".fromCur").attr('target',nbPost);
+	$("#inputTable tbody tr:last").find(".toCur").attr('target',nbPost);
+
+	$("#inputTable tbody tr:last").append("<td><button type='button' class='btn btn-xs btn-danger bRemoveRow' id='test'><span class='glyphicon glyphicon-trash'></span></button></td>")
+
+//$("#test").unbind("click");
+//$("#test").bind("click",removeRow(this));
+
+	$(".inputAmount").unbind();
+	$(".inputAmount").bind("focus", focusInput);
+	$(".inputAmount").bind("blur", blurInput);
+	$(".inputAmount").on('input',function(){	
+		changeInput(this);	
+	});
+//	$(".inputCur",".outputCur").bind("change",changeInput);
+	
+	$(".bRemoveRow").unbind();
+	$(".bRemoveRow").bind("click",removeRow);
+
+	$(".curChoice").unbind();
+$(".curChoice").change(function(){	
+	var cId = $(this).attr('target');
+	$(".inputAmount[id="+cId+"]").trigger("input");	
+});
+};
+
+$(".inputAmount").bind("focus", focusInput);
+$(".inputAmount").bind("blur", blurInput);
+$(".inputAmount").on('input',function(){	
+	changeInput(this);	
+});
+$(".curChoice").change(function(){	
+	var cId = $(this).attr('target');
+	$(".inputAmount[id="+cId+"]").trigger("input");	
 });
 
+$(".bRemoveRow").bind("click",removeRow);
 
-$("#bAddObject").click(function(){
+$("#bAddRow").click(addRow);
 
-var items = [];
-items.push("<p>");
-items.push("<select id='fromCur'>\
-  <option value='eur'>Avion</option>\
-  <option value='vef'>Cupo Viajero</option>\
-  <option value='usd'>Cupo Internet</option>\
-  <option value='usd'>Tarjeta de credito</option>\
-</select>");
-items.push("<select id='fromCur'>\
-  <option value='eur'>Oficial</option>\
-  <option value='vef'>Paralelo</option>\
-  <option value='usd'>Sicad</option>\
-  <option value='usd'>Sicad II</option>\
-</select>");
-items.push("</p>");
-items.push("<p>");
-items.push("<select id='fromCur'>\
-  <option value='eur'>Euro</option>\
-  <option value='vef'>BsF</option>\
-  <option value='usd'>Dolar</option>\
-</select>");
-items.push("<input type='text' id='1'></input>");
-items.push("</p>");
-items.push("<p>");
-items.push("<select id='toCur'>\
-  <option value='eur'>Euro</option>\
-  <option value='vef'>BsF</option>\
-  <option value='usd'>Dolar</option>\
-</select>");
-items.push("<input class='inputCur' type='text'></input>");
-items.push("<hr size='3' width='45'>");
 
-amountArr.push(0);
-
-		nbPost = nbPost + 1;
-		var strId = "post" + nbPost;
-	console.log(strId);
-	  	$( "<div/>", {
-			id : strId,
-			html : items.join("")
-	  	}).appendTo("#testPanel");
-});
-
-$("#inputSuccess2").on('input',function(){
+$("#inputSuccess2").on('input',function(){	
 	var iId = 1;
 	var strId = "#rate" + iId;
 	var cRate = $("#rate1").text();
@@ -70,15 +97,6 @@ $("#inputSuccess2").on('input',function(){
 	$("#amountConv").text(amountConv);	
 });
 
-$(".inputCur").on(".inputCur",function(){
-	var iId = 1;
-	var strId = "#rate" + iId;
-	var cRate = $("#rate1").text();
-	var cAmount = $("#inputSuccess2").val();
-	amountConv = cAmount*cRate;
-	amountConv = amountConv.toFixed(2);
-	$("#amountConv").text(amountConv);	
-});
 
 
 var displayArr = function(arr,loc){
@@ -112,6 +130,7 @@ var getExRate = function(arrayCur){
 
 	//Call to Yahoo Finances
 	var flickerAPI = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20in%20("+stringCur+")&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
+	console.log("getting rates...");
 	  $.getJSON( flickerAPI, {
 	    tags: "test yahoo",
 	    tagmode: "any",
@@ -127,9 +146,10 @@ var getExRate = function(arrayCur){
 	    		console.log( "error" );
 			return false;
 	  	});
+	console.log("rates ok!");
 };
 
-getExRate(["EURUSD","USDVEF","USDCOP"]);
+getExRate(["EURUSD","USDVEF","USDCOP","VEFVEF"]);
 
 
 

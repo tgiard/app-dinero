@@ -27,20 +27,73 @@
                 <ul class="nav nav-pills pull-right">
                     <li class="active"><a href="#">Home</a></li>
                     <li><a href="#">About</a></li>
-                    <li><a href="#">Contact</a></li>
+                    <li><a href=d "#">Contact</a></li>
                 </ul>
                 <h3 class="text-muted">app dinero</h3>
             </div>
 
-            <div class="jumbotron" id="testPanel">
-		<button type="button" class="btn btn-default btn-success" id="bAddObject"><span class="glyphicon glyphicon-plus"></span></button>
-            </div>
+
+<button type="button" class="btn btn-default btn-success" id="bAddRow">
+	<span class="glyphicon glyphicon-plus"></span>
+</button>
+<div class="table-responsive" contenteditable="true">
+  <table class="table" id="inputTable" contenteditable="false">
+<thead>
+	<tr contenteditable="false">
+	  <th>OBJECT</th>
+	  <th>INPUT</th>
+	  <th>CUR</th>
+	  <th>OUTPUT</th> 
+	  <th>CUR</th>
+	  <th>TYPE</th>
+	  <th>DELETE</th>
+	</tr>
+</thead>
+<tbody>
+	<tr>
+	<td>
+		<select id='inputObject'>
+			<option value='flight'>Avion</option>
+			<option value='travel'>Cupo Viajero</option>
+			<option value='internet'>Cupo Internet</option>
+			<option value='creditcard'>Cupo Tarjeta Credito</option>
+		</select>
+	</td>
+  	<td id="input1Table"><input type='text' class="inputAmount Amount" id='1' ></input></td>
+	<td>
+		<select class="fromCur curChoice" target="1">
+			<option value='VEF'>VEF</option>
+			<option value='EUR'>EUR</option>
+			<option value='USD'>USD</option>
+		</select>
+	</td>
+  	<td contenteditable="false"><p class="outputAmount Amount" target="1"></p></td>
+	<td>
+		<select class="toCur curChoice" target="1">
+			<option value='VEF'>VEF</option>
+			<option value='EUR'>EUR</option>
+			<option value='USD'>USD</option>
+		</select>
+	</td>
+	<td>
+		<select class="changeType" target="1">
+			<option value='oficial'>Oficial</option>
+			<option value='sicad'>Sicad</option>
+			<option value='sicad2'>Sicad II</option>
+			<option value='paralelo'>Paralelo</option>
+		</select>
+	</td>
+
+</tr>
+</tbody>
+  </table>
+</div>
 
             <div class="jumbotron" id="mainPanel">
                 <h1>Viaje vs Dinero</h1>
                 <p class="lead">Planifica tu viaje economicamente.</p>
 		<p><label class="control-label" for="inputSuccess2">Cuantos Euros tiene?</label></p>
-		<p><input type="text" id="inputSuccess2">€</p>
+		<p><input type="text" class="testClass" id="inputSuccess2">€</p>
 		<p><label id="amountConv"></label>$</p>
             </div>
 
