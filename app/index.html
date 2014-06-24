@@ -57,11 +57,12 @@
 			<option value='travel'>Cupo Viajero</option>
 			<option value='internet'>Cupo Internet</option>
 			<option value='creditcard'>Cupo Tarjeta Credito</option>
+			<option value='other'>Otro</option>
 		</select>
 	</td>
   	<td id="input1Table"><input type='text' class="inputAmount Amount" id='1' ></input></td>
 	<td>
-		<select class="fromCur curChoice" target="1">
+		<select class="curChoice fromCur" target="1">
 			<option value='VEF'>VEF</option>
 			<option value='EUR'>EUR</option>
 			<option value='USD'>USD</option>
@@ -69,14 +70,14 @@
 	</td>
   	<td contenteditable="false"><p class="outputAmount Amount" target="1"></p></td>
 	<td>
-		<select class="toCur curChoice" target="1">
+		<select class="curChoice toCur" target="1">
 			<option value='VEF'>VEF</option>
 			<option value='EUR'>EUR</option>
 			<option value='USD'>USD</option>
 		</select>
 	</td>
 	<td>
-		<select class="changeType" target="1">
+		<select class="changeType curChoice" target="1">
 			<option value='oficial'>Oficial</option>
 			<option value='sicad'>Sicad</option>
 			<option value='sicad2'>Sicad II</option>
