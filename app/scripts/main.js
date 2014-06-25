@@ -9,6 +9,68 @@ var objects = [];
 var types = [];
 var cur = [];
 var rates = {};
+var rssXMLCucuta = "http://feeds.feedburner.com/Bolivarcucuta?format=xml";
+var rssXMLSicad2 = "http://feeds.feedburner.com/Dolarsicad?format=xml";
+var rateCOPBOLCu = -1;
+var rateUSDVEFSicad2 = -1;
+var rateUSDVEFSicad1 = 10.60;
+
+
+function testRSS(){
+	var url = rssXMLCucuta;
+	var str = '';
+	$.ajax({
+		type: "GET",
+		url: document.location.protocol + '//ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=1000&callback=?&q=' + encodeURIComponent(url),
+		dataType: 'json',
+		error: function(){
+			alert('Unable to load feed, Incorrect path or invalid feed');
+		},
+		success: function(xml){
+			values = xml.responseData.feed.entries;
+			$.each(values,function(key,val){
+				str = val['title'];
+				var n = str.search("Precio del Bolívar");	
+				if(n>=0){
+					var strTest = "Compra: ";
+					n = str.search(strTest);	
+					console.log(str);	
+					var start = n+strTest.length;
+					rateCOPBOLCu = str.substring(start,start+5);
+					console.log(rateCOPBOLCu);
+					return false;
+				};	
+			});
+		}
+	});
+	url = rssXMLSicad2;
+	str = '';
+	$.ajax({
+		type: "GET",
+		url: document.location.protocol + '//ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=1000&callback=?&q=' + encodeURIComponent(url),
+		dataType: 'json',
+		error: function(){
+			alert('Unable to load feed, Incorrect path or invalid feed');
+		},
+		success: function(xml){
+			values = xml.responseData.feed.entries;
+			$.each(values,function(key,val){
+				str = val['title'];	
+				var n = str.search("Tasa Sicad 2 cerró");	
+				if(n>=0){
+					var strTest = "BsF. ";
+					n = str.search(strTest);	
+					console.log(str);	
+					var start = n+strTest.length;
+					rateUSDVEFSicad2 = (str.substring(start,start+5).replace(',', '.'));
+					console.log(rateUSDVEFSicad2);
+					return false;
+				};	
+			});
+		}
+	});
+};
+testRSS();
 
 function fillTables(){
 	console.log("filling tables");
@@ -41,19 +103,32 @@ function fillTables(){
 	$.each(rates['oficial'],function(key,val){
 		$.each(val,function(key1,val1){
 			rates['paralelo'][key][key1]=val1;		
+			rates['sicad'][key][key1]=val1;
+			rates['sicad2'][key][key1]=val1;				
 		});	
 	});
-	rates['paralelo']['USD']['VEF']=ratesYahoo['USDCOP']*1.05/27.50;
+	rates['paralelo']['USD']['VEF']=ratesYahoo['USDCOP']*1.05/rateCOPBOLCu;
 	rates['paralelo']['VEF']['USD']=1/rates['paralelo']['USD']['VEF'];
 	rates['paralelo']['EUR']['VEF']=rates['paralelo']['USD']['VEF']*rates['oficial']['EUR']['USD'];
 	rates['paralelo']['VEF']['EUR']=1/rates['paralelo']['EUR']['VEF'];
-$.each(rates,function(key0,val0){
-	$.each(val0,function(key,val){
-		$.each(val,function(key1,val1){
-			console.log(key0+"-"+key+"-"+key1+" : "+val1);		
-		});	
-	});
-});
+
+	rates['sicad']['USD']['VEF']=rateUSDVEFSicad1;
+	rates['sicad']['VEF']['USD']=1/rates['sicad']['USD']['VEF'];
+	rates['sicad']['EUR']['VEF']=rateUSDVEFSicad1*ratesYahoo['EURUSD'];
+	rates['sicad']['VEF']['EUR']=1/rates['sicad']['EUR']['VEF'];
+
+
+	rates['sicad2']['USD']['VEF']=rateUSDVEFSicad2;
+	rates['sicad2']['VEF']['USD']=1/rates['sicad2']['USD']['VEF'];
+	rates['sicad2']['EUR']['VEF']=rateUSDVEFSicad2*ratesYahoo['EURUSD'];
+	rates['sicad2']['VEF']['EUR']=1/rates['sicad2']['EUR']['VEF'];
+//$.each(rates,function(key0,val0){
+//	$.each(val0,function(key,val){
+//		$.each(val,function(key1,val1){
+//			console.log(key0+"-"+key+"-"+key1+" : "+val1);		
+//		});	
+//	});
+//});
 };
 
 var focusInput = function(){
@@ -67,14 +142,10 @@ var blurInput = function(){
 var changeInput = function(ob){
 	var cAmount = $(ob).val();
 	var cId = $(ob).attr('id');
-	console.log(cId);
 	if($.isNumeric(cAmount)){
 		var cFromCur = $(".fromCur[target="+cId+"]").val();
-	console.log(cFromCur);
 		var cToCur = $(".toCur[target="+cId+"]").val();
-	console.log(cToCur);
 		var cType = $(".changeType[target="+cId+"]").val();
-	console.log(cType);
 		var cRate = rates[cType][cFromCur][cToCur];
 		var cOutput = cAmount*cRate;
 		$(".outputAmount[target="+cId+"]").text(cOutput.toFixed(2));
@@ -122,6 +193,9 @@ var addRow = function(){
 
 	newRowBind();
 };
+addRow();
+addRow();
+addRow();
 
 newRowBind();
 $("#bAddRow").click(addRow);
@@ -155,6 +229,15 @@ var displayArr = function(arr,loc){
 	  	}).prependTo( loc );
 };
 
+function displayRates(loc){
+	var items = [];
+	items.push("$ Paralelo : " + rates['paralelo']['USD']['VEF'].toFixed(2	));	 
+	  	$( "<div/>", {
+	    		"class": "my-new-list",
+	    		html: items.join( "" )
+	  	}).prependTo( loc );
+};
+
 var getExRate = function(arrayCur){
 	//String Currency Construction
 	var r = $.Deferred();
@@ -181,6 +264,7 @@ var getExRate = function(arrayCur){
 			});			
 			displayArr(ratesYahoo,"#mainPanel");
 			fillTables();
+			displayRates("#mainPanel");
 	    	})
 	  	.fail(function() {
 	    		console.log( "error" );
