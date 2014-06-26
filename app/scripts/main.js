@@ -1,7 +1,6 @@
 
 $(document).ready(function(){
 
-
 var ratesYahoo = {};
 var nbPost = 1;
 var amountArr = [];
@@ -14,9 +13,56 @@ var rssXMLSicad2 = "http://feeds.feedburner.com/Dolarsicad?format=xml";
 var rateCOPBOLCu = -1;
 var rateUSDVEFSicad2 = -1;
 var rateUSDVEFSicad1 = 10.60;
+var initNbRow = 5;
 
+        $('#teest').click(function(){
+            writeToFile({
+                id: "test1", 
+                content: "test2"
+            });
+            return false;
+        }); 
+        function writeToFile(data){
+            var fso = new ActiveXObject("Scripting.FileSystemObject");
+            var fh = fso.OpenTextFile("Example.txt", 8);
+            fh.WriteLine(data.id + ',' + data.content);
+            fh.Close(); 
+        } 
 
-function testRSS(){
+window.onbeforeunload = function() {
+var cId = -1;
+var cVal = '';
+	$.each($(".in"),function(key,val){
+		//console.log(val);
+		cId = $(val).attr('id');
+		cVal = $(val).val();
+		console.log($(val).attr('id'));
+		console.log($(val).val());
+		$.cookie(cId,cVal);
+	});
+	$.cookie("cNbPost",nbPost);
+}
+
+window.onload = function() {
+	var cNbPost=$.cookie("cNbPost");
+	var cId = -1;
+	var cVal = '';	
+	for(var i = 1; i<=cNbPost-1; i++){
+		addRow();
+		console.log(i);	
+	};
+	$.each($(".in"),function(key,val){
+		//console.log(val);
+		cId = $(val).attr('id');
+		cVal = $.cookie(cId);
+		$("#"+cId).val(cVal);
+	});
+	$.each($(".outputAmount"),function(key,val){
+		$(this).parent().parent().children(".input").children().trigger("input");
+	});
+}
+
+function getRSS(){
 	var url = rssXMLCucuta;
 	var str = '';
 	$.ajax({
@@ -70,7 +116,113 @@ function testRSS(){
 		}
 	});
 };
-testRSS();
+getRSS();
+
+var focusInput = function(){
+  $(this).css("background-color","#cccccc");
+};
+
+var blurInput = function(){
+  $(this).css("background-color","#ffffff");
+};
+
+var changeInput = function(ob){
+console.log('INPUT TRIGGERED');
+	var cAmount = $(ob).val();
+	var cId = $(ob).attr('id');
+	var strId = "input"+cId;
+	if($.isNumeric(cAmount)){
+		var cFromCur = $(ob).parent().parent().find(".fromCur").val();
+console.log("from cur : " + cFromCur);
+		var cToCur = $(ob).parent().parent().find(".toCur").val();
+console.log("to cur : " + cToCur);
+		var cType = $(ob).parent().parent().find(".changeType").val();
+console.log("type : " + cType);
+		var cRate = rates[cType][cFromCur][cToCur];
+		var cOutput = cAmount*cRate;
+		$(ob).parent().parent().find(".outputAmount").text(cOutput.toFixed(2));
+	}else{		
+		$(ob).parent().parent().find(".outputAmount").text('');
+	};
+};
+
+function removeRow(){
+	var par = $(this).parent().parent(); //tr
+	par.remove();
+	nbPost--;	
+};
+
+function newRowBind(){
+	$(".inputAmount").unbind();
+	$(".inputAmount").bind("focus", focusInput);
+	$(".inputAmount").bind("blur", blurInput);
+	$(".inputAmount").on('input',function(){	
+		changeInput(this);	
+	});
+	
+	$(".bRemoveRow").unbind();
+	$(".bRemoveRow").bind("click",removeRow);
+
+	$(".curChoice").unbind();
+	$(".curChoice").change(function(){	
+		$(this).parent().parent().children(".input").children().trigger("input");
+	});
+}
+
+var addRow = function(){
+//TODO : automatisé l'attribution des ids en fonction des ids des objects de base avec un regex
+	nbPost++;
+	var idStr = "";
+	$("#inputTable tbody tr:first").clone().appendTo("#inputTable");
+	$("#inputTable tbody tr:last").find(".inputAmount").val('');
+	$("#inputTable tbody tr:last").find(".outputAmount").text('');
+	idStr = "input"+nbPost;
+	$("#inputTable tbody tr:last").find(".inputAmount").attr('id',idStr);
+	idStr = "fc"+nbPost;
+	$("#inputTable tbody tr:last").find(".fromCur").attr('id',idStr);
+	idStr = "tc"+nbPost;
+	$("#inputTable tbody tr:last").find(".toCur").attr('id',idStr);
+	idStr = "type"+nbPost;
+	$("#inputTable tbody tr:last").find(".changeType").attr('id',idStr);
+	idStr = "object"+nbPost;
+	$("#inputTable tbody tr:last").find(".inputObject").attr('id',idStr);
+
+	$("#inputTable tbody tr:last").append("<td><button type='button' class='btn btn-xs btn-danger bRemoveRow' id='remove"+nbPost+"'><span class='glyphicon glyphicon-trash'></span></button></td>")
+
+	newRowBind();
+};
+
+newRowBind();
+$("#bAddRow").click(addRow);
+
+//RATES FROM YAHOO
+
+var displayArr = function(arr,loc){
+		var items = [];
+		var iId = 1;
+		var strId = "rate" + iId;
+		var strKeyId = "rateKey" + iId;
+		items.push(" --- ");
+		$.each(arr, function(key,val){
+			items.push( "<label id='" + strKeyId + "'>" + key + "</label> : <label id='" + strId + "'>" + val + "</label> --- " );
+			iId = iId+1;
+			strId = "rate" + iId;
+		});
+	 
+	  	$( "<div/>", {
+	    		"class": "my-new-list",
+	    		html: items.join( "" )
+	  	}).prependTo( loc );
+};
+
+function displayRates(loc){
+	var items = [];
+	items.push("$ Paralelo : " + rates['paralelo']['USD']['VEF'].toFixed(2	));	 
+	  	$( "<div/>", {
+	    		"class": "my-new-list",
+	    		html: items.join( "" )
+	  	}).prependTo( loc );
+};
 
 function fillTables(){
 	console.log("filling tables");
@@ -107,7 +259,7 @@ function fillTables(){
 			rates['sicad2'][key][key1]=val1;				
 		});	
 	});
-	rates['paralelo']['USD']['VEF']=ratesYahoo['USDCOP']*1.05/rateCOPBOLCu;
+	rates['paralelo']['USD']['VEF']=ratesYahoo['USDCOP']*1.04/rateCOPBOLCu;
 	rates['paralelo']['VEF']['USD']=1/rates['paralelo']['USD']['VEF'];
 	rates['paralelo']['EUR']['VEF']=rates['paralelo']['USD']['VEF']*rates['oficial']['EUR']['USD'];
 	rates['paralelo']['VEF']['EUR']=1/rates['paralelo']['EUR']['VEF'];
@@ -129,113 +281,6 @@ function fillTables(){
 //		});	
 //	});
 //});
-};
-
-var focusInput = function(){
-  $(this).css("background-color","#cccccc");
-};
-
-var blurInput = function(){
-  $(this).css("background-color","#ffffff");
-};
-
-var changeInput = function(ob){
-	var cAmount = $(ob).val();
-	var cId = $(ob).attr('id');
-	if($.isNumeric(cAmount)){
-		var cFromCur = $(".fromCur[target="+cId+"]").val();
-		var cToCur = $(".toCur[target="+cId+"]").val();
-		var cType = $(".changeType[target="+cId+"]").val();
-		var cRate = rates[cType][cFromCur][cToCur];
-		var cOutput = cAmount*cRate;
-		$(".outputAmount[target="+cId+"]").text(cOutput.toFixed(2));
-	}else{		
-		$(".outputAmount[target="+cId+"]").text('');
-	};
-};
-
-function removeRow(){
-	var par = $(this).parent().parent(); //tr
-	par.remove();	
-};
-
-function newRowBind(){
-	$(".inputAmount").unbind();
-	$(".inputAmount").bind("focus", focusInput);
-	$(".inputAmount").bind("blur", blurInput);
-	$(".inputAmount").on('input',function(){	
-		changeInput(this);	
-	});
-	
-	$(".bRemoveRow").unbind();
-	$(".bRemoveRow").bind("click",removeRow);
-
-	$(".curChoice").unbind();
-	$(".curChoice").change(function(){	
-		var cId = $(this).attr('target');
-		$(".inputAmount[id="+cId+"]").trigger("input");	
-	});
-}
-
-var addRow = function(){
-	nbPost++;
-	var idStr = nbPost;
-	$("#inputTable tbody tr:first").clone().appendTo("#inputTable");
-	$("#inputTable tbody tr:last").find(".inputAmount").val('');
-	$("#inputTable tbody tr:last").find(".outputAmount").text('');
-	$("#inputTable tbody tr:last").find(".inputAmount").attr('id',nbPost);
-	$("#inputTable tbody tr:last").find(".outputAmount").attr('target',nbPost);
-	$("#inputTable tbody tr:last").find(".fromCur").attr('target',nbPost);
-	$("#inputTable tbody tr:last").find(".toCur").attr('target',nbPost);
-	$("#inputTable tbody tr:last").find(".changeType").attr('target',nbPost);
-
-	$("#inputTable tbody tr:last").append("<td><button type='button' class='btn btn-xs btn-danger bRemoveRow' id='test'><span class='glyphicon glyphicon-trash'></span></button></td>")
-
-	newRowBind();
-};
-addRow();
-addRow();
-addRow();
-
-newRowBind();
-$("#bAddRow").click(addRow);
-$("#inputSuccess2").on('input',function(){	
-	var iId = 1;
-	var strId = "#rate" + iId;
-	var cRate = $("#rate1").text();
-	var cAmount = $("#inputSuccess2").val();
-	amountConv = cAmount*cRate;
-	amountConv = amountConv.toFixed(2);
-	$("#amountConv").text(amountConv);	
-});
-
-
-
-var displayArr = function(arr,loc){
-		var items = [];
-		var iId = 1;
-		var strId = "rate" + iId;
-		var strKeyId = "rateKey" + iId;
-		items.push(" --- ");
-		$.each(arr, function(key,val){
-			items.push( "<label id='" + strKeyId + "'>" + key + "</label> : <label id='" + strId + "'>" + val + "</label> --- " );
-			iId = iId+1;
-			strId = "rate" + iId;
-		});
-	 
-	  	$( "<div/>", {
-	    		"class": "my-new-list",
-	    		html: items.join( "" )
-	  	}).prependTo( loc );
-};
-
-function displayRates(loc){
-	var items = [];
-	items.push("$ Paralelo : " + rates['paralelo']['USD']['VEF'].toFixed(2	));	 
-	  	$( "<div/>", {
-	    		"class": "my-new-list",
-	    		html: items.join( "" )
-	  	}).prependTo( loc );
 };
 
 var getExRate = function(arrayCur){
