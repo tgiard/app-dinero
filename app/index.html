@@ -1,3 +1,5 @@
+
+
 <!doctype html>
 
 <html class="no-js">
@@ -18,6 +20,7 @@
         <!-- endbuild -->	
     </head>
     <body>
+
         <!--[if lt IE 10]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
@@ -33,12 +36,17 @@
                 <h3 class="text-muted">app dinero</h3>
             </div>
 
-<button type="button" class="btn btn-default btn-info" id="teest" value="blabla">
-	<span class="glyphicon glyphicon-plus"></span>
-</button>
+<form method="post" name="tasktitleform" action="">
+	<div class="title"></div>
+	<input class="tasktitle" id="tasktitle" name="tasktitle" type="text" value="Task name..." onfocus="if (this.value == 'Task name...') {this.value = '';}" onblur="if (this.value == '') {this.value = 'Task name...';}" />
+	<input class="save" value="Save" type="button" />
+</form>
+
+
 <button type="button" class="btn btn-default btn-success" id="bAddRow">
 	<span class="glyphicon glyphicon-plus"></span>
 </button>
+
 <div class="table-responsive" contenteditable="true">
   <table class="table" id="inputTable" contenteditable="false">
 <thead>
@@ -49,6 +57,7 @@
 	  <th>OUTPUT</th> 
 	  <th>CUR</th>
 	  <th>TYPE</th>
+	  <!--<the>COMMENT</th>-->
 	  <th>DELETE</th>
 	</tr>
 </thead>
@@ -60,7 +69,7 @@
 			<option value='travel'>Cupo Viajero</option>
 			<option value='internet'>Cupo Internet</option>
 			<option value='creditcard'>Cupo Tarjeta Credito</option>
-			<option value='other'>Otro</option>
+			<option value='other' contenteditable="true">Otro</option>
 		</select>
 	</td>
   	<td class="input"><input type='text' class="in inputAmount Amount" id='input1' ></input></td>
@@ -86,7 +95,8 @@
 			<option value='sicad2'>Sicad II</option>
 			<option value='paralelo'>Paralelo</option>
 		</select>
-	</td>
+	</td>	
+<!--  	<td><input type='text' class="in comment" id='com1' ></input></td>-->
 
 </tr>
 </tbody>

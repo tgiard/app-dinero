@@ -7,6 +7,8 @@
 // use this if you want to recursively match all subfolders:
 // 'test/spec/**/*.js'
 
+var gateway = require('gateway');
+
 module.exports = function (grunt) {
 
     // Load grunt tasks automatically
@@ -74,12 +76,22 @@ module.exports = function (grunt) {
             },
             livereload: {
                 options: {
-                    middleware: function(connect) {
+                    /*middleware: function(connect) {
                         return [
                             connect.static('.tmp'),
                             connect().use('/bower_components', connect.static('./bower_components')),
                             connect.static(config.app)
                         ];
+                    }*/
+                    middleware: function(connect) {
+			return [
+			    gateway(__dirname + '/app', {
+			      '.php': 'php-cgi'
+			    }),
+                            connect.static('.tmp'),
+                            connect().use('/bower_components', connect.static('./bower_components')),
+                            connect.static(config.app)
+			  ];
                     }
                 }
             },

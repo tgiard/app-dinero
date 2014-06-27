@@ -1,13 +1,20 @@
 
 $(document).ready(function(){
 
+$('.update').click(function(e){ 
+	updateRates();	
+});
+
+
+
+
 var ratesYahoo = {};
 var nbPost = 1;
 var amountArr = [];
 var objects = [];
 var types = [];
 var cur = [];
-var rates = {};
+var rates=[];
 var rssXMLCucuta = "http://feeds.feedburner.com/Bolivarcucuta?format=xml";
 var rssXMLSicad2 = "http://feeds.feedburner.com/Dolarsicad?format=xml";
 var rateCOPBOLCu = -1;
@@ -15,51 +22,60 @@ var rateUSDVEFSicad2 = -1;
 var rateUSDVEFSicad1 = 10.60;
 var initNbRow = 5;
 
-        $('#teest').click(function(){
-            writeToFile({
-                id: "test1", 
-                content: "test2"
-            });
-            return false;
-        }); 
-        function writeToFile(data){
-            var fso = new ActiveXObject("Scripting.FileSystemObject");
-            var fh = fso.OpenTextFile("Example.txt", 8);
-            fh.WriteLine(data.id + ',' + data.content);
-            fh.Close(); 
-        } 
+function getRates(){
+	$.getJSON("../rates.json", function(data){
+		$.each(data, function (index, value) {
+			rates[index]={};
+		    	$.each(value, function (index1, value1) {
+				rates[index][index1]={};
+		    		$.each(value1, function (index2, value2) {
+					rates[index][index1][index2]=value2;
+				})
+			})
+		});
+	}).done(function(){
+		displayRates();
+	});
+};
+getRates();
+
+//$(window).unload(function() {
+//	$.each($(".in"),function(key,val){
+//		cId = $(val).attr('id');
+//   		$.cookies.del(cId);
+//	});
+//});
 
 window.onbeforeunload = function() {
 var cId = -1;
 var cVal = '';
-	$.each($(".in"),function(key,val){
+/*	$.each($(".in"),function(key,val){
 		//console.log(val);
 		cId = $(val).attr('id');
 		cVal = $(val).val();
 		console.log($(val).attr('id'));
 		console.log($(val).val());
 		$.cookie(cId,cVal);
-	});
-	$.cookie("cNbPost",nbPost);
+	});*/
+	$.cookie("cNbPost",nbPost);	
+	$.cookie("notFirstLoad",1);
 }
 
 window.onload = function() {
-	var cNbPost=$.cookie("cNbPost");
+var cId = -1;
+var cNbPost=$.cookie("cNbPost");
+if($.cookie("notFirstLoad")==1){
+	console.log("Not First Load");
 	var cId = -1;
 	var cVal = '';	
 	for(var i = 1; i<=cNbPost-1; i++){
 		addRow();
 		console.log(i);	
 	};
-	$.each($(".in"),function(key,val){
-		//console.log(val);
-		cId = $(val).attr('id');
-		cVal = $.cookie(cId);
-		$("#"+cId).val(cVal);
-	});
-	$.each($(".outputAmount"),function(key,val){
+	/*$.each($(".outputAmount"),function(key,val){
 		$(this).parent().parent().children(".input").children().trigger("input");
-	});
+	});*/		
+};
 }
 
 function getRSS(){
@@ -148,6 +164,11 @@ console.log("type : " + cType);
 
 function removeRow(){
 	var par = $(this).parent().parent(); //tr
+	console.log($(par).find(".in").attr("id"));
+	/*$.each($(par).find(".in"), function(key,val){
+		console.log($(val).attr("id"));
+		$.cookie($(val).attr("id"),null);
+		});*/
 	par.remove();
 	nbPost--;	
 };
@@ -215,17 +236,18 @@ var displayArr = function(arr,loc){
 	  	}).prependTo( loc );
 };
 
-function displayRates(loc){
+function displayRates(){
 	var items = [];
-	items.push("$ Paralelo : " + rates['paralelo']['USD']['VEF'].toFixed(2	));	 
+	items.push("$ Paralelo : " + rates['paralelo']['USD']['VEF'].toFixed(2));	 
 	  	$( "<div/>", {
 	    		"class": "my-new-list",
 	    		html: items.join( "" )
-	  	}).prependTo( loc );
+	  	}).prependTo( "#mainPanel" );
 };
 
-function fillTables(){
+function fillTables(callback){
 	console.log("filling tables");
+	rates={};
 	var cCur = '';
 	var cType = '';
 	$.each($("#inputObject option"),function(key,val){
@@ -281,6 +303,25 @@ function fillTables(){
 //		});	
 //	});
 //});
+
+    if(typeof callback === "function") {
+        callback();
+    };
+};
+
+function saveRatesToFile(){
+			var dataString = "jsonObject="+JSON.stringify(rates,null,'\t');
+ 
+			$.ajax({
+      			type: "POST",
+      			url: "save.php",
+      			data: dataString,
+ 
+      				success: function() {
+						alert("Rates saved in file");
+         				}
+			});
+			return false;
 };
 
 var getExRate = function(arrayCur){
@@ -307,21 +348,18 @@ var getExRate = function(arrayCur){
 			$.each(data.query.results.rate, function(i,val){
 				ratesYahoo[val.id] = val.Rate
 			});			
-			displayArr(ratesYahoo,"#mainPanel");
-			fillTables();
-			displayRates("#mainPanel");
+			fillTables(saveRatesToFile);
 	    	})
 	  	.fail(function() {
 	    		console.log( "error" );
 			return false;
 	  	});
 	console.log("ratesYahoo ok!");
-	     if (typeof(callback) == 'function') {
-		callback();
-	     }
 };
 
-getExRate(["EURUSD","USDVEF","USDCOP","VEFVEF"]);
+function updateRates(){
+	getExRate(["EURUSD","USDVEF","USDCOP","VEFVEF"]); 
+};
 
 
 
