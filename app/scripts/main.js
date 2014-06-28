@@ -39,12 +39,18 @@ function getRates(){
 };
 getRates();
 
-//$(window).unload(function() {
-//	$.each($(".in"),function(key,val){
-//		cId = $(val).attr('id');
-//   		$.cookies.del(cId);
-//	});
-//});
+$(window).unload(function() {
+	var arr = {};
+	$.cookie("arrInput",{});
+	$.each($("#inputTable tbody").find("tr"),function(i,row){
+		console.log(i);
+		arr[i]={};
+		$.each($(row).find(".in"),function(j,col){
+			arr[i][$(col).attr('id')]=$(col).val();
+		});
+	});
+	$.cookie("arrInput",JSON.stringify(arr));
+});
 
 window.onbeforeunload = function() {
 var cId = -1;
@@ -64,18 +70,19 @@ var cVal = '';
 window.onload = function() {
 var cId = -1;
 var cNbPost=$.cookie("cNbPost");
-if($.cookie("notFirstLoad")==1){
-	console.log("Not First Load");
-	var cId = -1;
-	var cVal = '';	
-	for(var i = 1; i<=cNbPost-1; i++){
+if($.cookie("arrInput") != null){
+	var arrInput = JSON.parse($.cookie("arrInput"));
+	$.each(arrInput,function(i,v){
 		addRow();
-		console.log(i);	
-	};
-	/*$.each($(".outputAmount"),function(key,val){
-		$(this).parent().parent().children(".input").children().trigger("input");
-	});*/		
+		//TODO : remettre les valeurs dans les input
+		$.each(v,function(i1,v1){
+			console.log(i+" - "+i1+" - "+v1);
+		});
+	});
+	console.log("Not First Load");
 };
+
+
 }
 
 function getRSS(){
@@ -142,29 +149,28 @@ var blurInput = function(){
   $(this).css("background-color","#ffffff");
 };
 
-var changeInput = function(ob){
-console.log('INPUT TRIGGERED');
-	var cAmount = $(ob).val();
-	var cId = $(ob).attr('id');
-	var strId = "input"+cId;
+function modifyInput(ob){
+	var par = $(ob).parent().parent(); //tr
+	//console.log($(par));
+	var cAmount = $(par).find(".inputAmount").val();
 	if($.isNumeric(cAmount)){
-		var cFromCur = $(ob).parent().parent().find(".fromCur").val();
-console.log("from cur : " + cFromCur);
-		var cToCur = $(ob).parent().parent().find(".toCur").val();
-console.log("to cur : " + cToCur);
-		var cType = $(ob).parent().parent().find(".changeType").val();
-console.log("type : " + cType);
+		var cFromCur = $(par).find(".fromCur").val();
+		console.log("from cur : " + cFromCur);
+		var cToCur = $(par).find(".toCur").val();
+		console.log("to cur : " + cToCur);
+		var cType = $(par).find(".changeType").val();
+		console.log("type : " + cType);
 		var cRate = rates[cType][cFromCur][cToCur];
 		var cOutput = cAmount*cRate;
-		$(ob).parent().parent().find(".outputAmount").text(cOutput.toFixed(2));
+		$(par).find(".outputAmount").text(cOutput.toFixed(2));
 	}else{		
-		$(ob).parent().parent().find(".outputAmount").text('');
+		$(par).find(".outputAmount").text('');
 	};
 };
 
 function removeRow(){
 	var par = $(this).parent().parent(); //tr
-	console.log($(par).find(".in").attr("id"));
+	console.log($(par));
 	/*$.each($(par).find(".in"), function(key,val){
 		console.log($(val).attr("id"));
 		$.cookie($(val).attr("id"),null);
@@ -178,7 +184,7 @@ function newRowBind(){
 	$(".inputAmount").bind("focus", focusInput);
 	$(".inputAmount").bind("blur", blurInput);
 	$(".inputAmount").on('input',function(){	
-		changeInput(this);	
+		modifyInput(this);	
 	});
 	
 	$(".bRemoveRow").unbind();
