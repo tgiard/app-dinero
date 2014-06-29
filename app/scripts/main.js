@@ -70,14 +70,18 @@ var cVal = '';
 window.onload = function() {
 var cId = -1;
 var cNbPost=$.cookie("cNbPost");
+var cIdStr = "";
 if($.cookie("arrInput") != null){
 	var arrInput = JSON.parse($.cookie("arrInput"));
 	$.each(arrInput,function(i,v){
-		addRow();
-		//TODO : remettre les valeurs dans les input
-		$.each(v,function(i1,v1){
+		if(i!=1) addRow();
+		$.each(v,function(i1,v1){				
+			$("#inputTable").find("#"+i1).val(v1);
 			console.log(i+" - "+i1+" - "+v1);
 		});
+	});
+	$.each($("#inputTable").find(".inputAmount"),function(i,val){
+		$(val).trigger("input");
 	});
 	console.log("Not First Load");
 };
