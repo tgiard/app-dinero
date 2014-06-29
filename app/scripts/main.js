@@ -74,7 +74,8 @@ var cIdStr = "";
 if($.cookie("arrInput") != null){
 	var arrInput = JSON.parse($.cookie("arrInput"));
 	$.each(arrInput,function(i,v){
-		if(i!=1) addRow();
+	console.log(i);
+		if(i!=0) addRow();
 		$.each(v,function(i1,v1){				
 			$("#inputTable").find("#"+i1).val(v1);
 			console.log(i+" - "+i1+" - "+v1);
@@ -174,7 +175,6 @@ function modifyInput(ob){
 
 function removeRow(){
 	var par = $(this).parent().parent(); //tr
-	console.log($(par));
 	/*$.each($(par).find(".in"), function(key,val){
 		console.log($(val).attr("id"));
 		$.cookie($(val).attr("id"),null);
@@ -329,6 +329,7 @@ function saveRatesToFile(){
  
       				success: function() {
 						alert("Rates saved in file");
+						location.reload();
          				}
 			});
 			return false;
@@ -368,9 +369,56 @@ var getExRate = function(arrayCur){
 };
 
 function updateRates(){
-	getExRate(["EURUSD","USDVEF","USDCOP","VEFVEF"]); 
+	getExRate(["EURUSD","USDVEF","USDCOP"]); 
 };
 
+function getTotalInput(){
+	console.log("TOTAL INPUT");
+	var countArr = {};
+	var cVal = NaN;
+	var cCur = '';
+	$.each($("#inputTable tbody tr:first .fromCur option"),function(key,val){
+		cCur=$(val).val();
+		console.log(cCur);
+		countArr[cCur]=0;
+	});
+	$.each($('#inputTable').find(".inputAmount"),function(i,val){
+		cVal=$(val).val();
+		cCur=$($(val).parent().parent().find('.fromCur')).val();	
+		if($.isNumeric(cVal)){
+			countArr[cCur] = countArr[cCur]+parseFloat(cVal);
+		};
+	});
+	return countArr;
+};
+
+$(".totalInput").click(function(){
+	console.log(getTotalInput());
+});
+
+function getTotalOutput(){
+	console.log("TOTAL OUTPUT");
+	var countArr = {};
+	var cVal = NaN;
+	var cCur = '';
+	$.each($("#inputTable tbody tr:first .fromCur option"),function(key,val){
+		cCur=$(val).val();
+		console.log(cCur);
+		countArr[cCur]=0;
+	});
+	$.each($('#inputTable').find(".outputAmount"),function(i,val){
+		cVal=$(val).text();
+		cCur=$($(val).parent().parent().find('.toCur')).val();	
+		if($.isNumeric(cVal)){
+			countArr[cCur] = countArr[cCur]+parseFloat(cVal);
+		};
+	});
+	return countArr;
+};
+
+$(".totalOutput").click(function(){
+	console.log(getTotalOutput());
+});
 
 
 //$.ajax({  
