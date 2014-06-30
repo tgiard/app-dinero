@@ -34,10 +34,11 @@ function getRates(){
 			})
 		});
 	}).done(function(){
+		//constructInputTable(getTotalInput(displayTotalInput));
+		constructInputTable(getTotalInput());
 		displayRates();
 	});
 };
-getRates();
 
 $(window).unload(function() {
 	var arr = {};
@@ -52,99 +53,33 @@ $(window).unload(function() {
 	$.cookie("arrInput",JSON.stringify(arr));
 });
 
-window.onbeforeunload = function() {
-var cId = -1;
-var cVal = '';
-/*	$.each($(".in"),function(key,val){
-		//console.log(val);
-		cId = $(val).attr('id');
-		cVal = $(val).val();
-		console.log($(val).attr('id'));
-		console.log($(val).val());
-		$.cookie(cId,cVal);
-	});*/
-	$.cookie("cNbPost",nbPost);	
-	$.cookie("notFirstLoad",1);
-}
-
 window.onload = function() {
-var cId = -1;
-var cNbPost=$.cookie("cNbPost");
-var cIdStr = "";
-if($.cookie("arrInput") != null){
-	var arrInput = JSON.parse($.cookie("arrInput"));
-	$.each(arrInput,function(i,v){
-	console.log(i);
-		if(i!=0) addRow();
-		$.each(v,function(i1,v1){				
-			$("#inputTable").find("#"+i1).val(v1);
-			console.log(i+" - "+i1+" - "+v1);
+	getRates();
+};
+
+function constructInputTable(callback){
+	var cId = -1;
+	var cIdStr = "";
+	if($.cookie("arrInput") != null){
+		var arrInput = JSON.parse($.cookie("arrInput"));
+		$.each(arrInput,function(i,v){
+	//	console.log(i);
+			if(i!=0) addRow();
+			$.each(v,function(i1,v1){				
+				$("#inputTable").find("#"+i1).val(v1);
+	//			console.log(i+" - "+i1+" - "+v1);
+			});
 		});
-	});
-	$.each($("#inputTable").find(".inputAmount"),function(i,val){
-		$(val).trigger("input");
-	});
-	console.log("Not First Load");
+		$.each($("#inputTable").find(".inputAmount"),function(i,val){
+			$(val).trigger("input");
+		});
+		console.log("Not First Load");
+	};
+
+    if(typeof callback === "function") {
+        callback();
+    };
 };
-
-
-}
-
-function getRSS(){
-	var url = rssXMLCucuta;
-	var str = '';
-	$.ajax({
-		type: "GET",
-		url: document.location.protocol + '//ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=1000&callback=?&q=' + encodeURIComponent(url),
-		dataType: 'json',
-		error: function(){
-			alert('Unable to load feed, Incorrect path or invalid feed');
-		},
-		success: function(xml){
-			values = xml.responseData.feed.entries;
-			$.each(values,function(key,val){
-				str = val['title'];
-				var n = str.search("Precio del Bolívar");	
-				if(n>=0){
-					var strTest = "Compra: ";
-					n = str.search(strTest);	
-					console.log(str);	
-					var start = n+strTest.length;
-					rateCOPBOLCu = str.substring(start,start+5);
-					console.log(rateCOPBOLCu);
-					return false;
-				};	
-			});
-		}
-	});
-	url = rssXMLSicad2;
-	str = '';
-	$.ajax({
-		type: "GET",
-		url: document.location.protocol + '//ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=1000&callback=?&q=' + encodeURIComponent(url),
-		dataType: 'json',
-		error: function(){
-			alert('Unable to load feed, Incorrect path or invalid feed');
-		},
-		success: function(xml){
-			values = xml.responseData.feed.entries;
-			$.each(values,function(key,val){
-				str = val['title'];	
-				var n = str.search("Tasa Sicad 2 cerró");	
-				if(n>=0){
-					var strTest = "BsF. ";
-					n = str.search(strTest);	
-					console.log(str);	
-					var start = n+strTest.length;
-					rateUSDVEFSicad2 = (str.substring(start,start+5).replace(',', '.'));
-					console.log(rateUSDVEFSicad2);
-					return false;
-				};	
-			});
-		}
-	});
-};
-getRSS();
 
 var focusInput = function(){
   $(this).css("background-color","#cccccc");
@@ -160,11 +95,11 @@ function modifyInput(ob){
 	var cAmount = $(par).find(".inputAmount").val();
 	if($.isNumeric(cAmount)){
 		var cFromCur = $(par).find(".fromCur").val();
-		console.log("from cur : " + cFromCur);
+//		console.log("from cur : " + cFromCur);
 		var cToCur = $(par).find(".toCur").val();
-		console.log("to cur : " + cToCur);
+//		console.log("to cur : " + cToCur);
 		var cType = $(par).find(".changeType").val();
-		console.log("type : " + cType);
+//		console.log("type : " + cType);
 		var cRate = rates[cType][cFromCur][cToCur];
 		var cOutput = cAmount*cRate;
 		$(par).find(".outputAmount").text(cOutput.toFixed(2));
@@ -248,9 +183,59 @@ var displayArr = function(arr,loc){
 
 function displayRates(){
 	var items = [];
-	items.push("$ Paralelo : " + rates['paralelo']['USD']['VEF'].toFixed(2));	 
+	items.push("<center>");
+	items.push("$ Paralelo : " + (rates['paralelo']['USD']['VEF']).toFixed(2)+" ---- ");
+	items.push("$ Sicad 2 : " + (rates['sicad2']['USD']['VEF']).toFixed(2)+" ---- "); 
+	items.push("$ Oficial : " + (rates['oficial']['USD']['VEF']).toFixed(2));
+	items.push("</center>");
 	  	$( "<div/>", {
 	    		"class": "my-new-list",
+	    		html: items.join( "" )
+	  	}).prependTo( "#mainPanel" );
+};
+
+function displayTotalInput(arr){
+	var items = [];
+	console.log("DISPLAY TOTAL INPUT");
+	console.log(arr);
+	items.push("TOTAL INPUT");
+	items.push("<table class='table' id='InputTotalTable' contenteditable='false'><thead><tr>");
+	$.each(arr,function(i,v){		
+		items.push("<td>"+ i +"</td>");
+	});
+	items.push("</tr></thead><tbody><tr>");
+	$.each(arr,function(i,v){		
+		items.push("<td>"+ v +"</td>");
+	});
+	items.push("</tr></table></tbody>");
+
+	  	$( "<div/>", {
+	    		"class": "totalInput",
+	    		html: items.join( "" )
+	  	}).prependTo( "#mainPanel" );
+
+    if(typeof callback === "function") {
+        callback();
+    };
+};
+
+function displayTotalOutput(){
+	var items = [];
+	var arr = getTotalOutput();
+	console.log(arr);
+	items.push("TOTAL OUTPUT");
+	items.push("<table class='table' id='InputTotalTable' contenteditable='false'><thead><tr>");
+	$.each(arr,function(i,v){		
+		items.push("<td>"+ i +"</td>");
+	});
+	items.push("</tr></thead><tbody><tr>");
+	$.each(arr,function(i,v){		
+		items.push("<td>"+ v +"</td>");
+	});
+	items.push("</tr></table></tbody>");
+
+	  	$( "<div/>", {
+	    		"class": "totalInput",
 	    		html: items.join( "" )
 	  	}).prependTo( "#mainPanel" );
 };
@@ -320,6 +305,7 @@ function fillTables(callback){
 };
 
 function saveRatesToFile(){
+	console.log("saving to file");
 			var dataString = "jsonObject="+JSON.stringify(rates,null,'\t');
  
 			$.ajax({
@@ -357,9 +343,10 @@ var getExRate = function(arrayCur){
 	  })
 	    	.done(function( data ) {
 			$.each(data.query.results.rate, function(i,val){
-				ratesYahoo[val.id] = val.Rate
-			});			
-			fillTables(saveRatesToFile);
+				ratesYahoo[val.id] = parseFloat(val.Rate);
+			});	
+			getRSS(fillTables,saveRatesToFile);		
+			//fillTables(saveRatesToFile);
 	    	})
 	  	.fail(function() {
 	    		console.log( "error" );
@@ -368,32 +355,98 @@ var getExRate = function(arrayCur){
 	console.log("ratesYahoo ok!");
 };
 
+function getRSS(callback,opt){
+	console.log('RSS');
+	var url = rssXMLCucuta;
+	var str = '';
+	$.ajax({
+		type: "GET",
+		url: document.location.protocol + '//ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=1000&callback=?&q=' + encodeURIComponent(url),
+		dataType: 'json',
+		error: function(){
+			alert('Unable to load feed, Incorrect path or invalid feed');
+		},
+		success: function(xml){
+			values = xml.responseData.feed.entries;
+			$.each(values,function(key,val){
+				str = val['title'];
+				var n = str.search("Precio del Bolívar");	
+				if(n>=0){
+					var strTest = "Compra: ";
+					n = str.search(strTest);	
+					console.log(str);	
+					var start = n+strTest.length;
+					rateCOPBOLCu = parseFloat(str.substring(start,start+5));
+					console.log(rateCOPBOLCu);
+					return false;
+				};	
+			});
+		}
+	});
+	url = rssXMLSicad2;
+	str = '';
+	$.ajax({
+		type: "GET",
+		url: document.location.protocol + '//ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=1000&callback=?&q=' + encodeURIComponent(url),
+		dataType: 'json',
+		error: function(){
+			alert('Unable to load feed, Incorrect path or invalid feed');
+		},
+		success: function(xml){
+			values = xml.responseData.feed.entries;
+			$.each(values,function(key,val){
+				str = val['title'];	
+				var n = str.search("Tasa Sicad 2 cerró");	
+				if(n>=0){
+					var strTest = "BsF. ";
+					n = str.search(strTest);	
+					console.log(str);	
+					var start = n+strTest.length;
+					rateUSDVEFSicad2 = parseFloat((str.substring(start,start+5).replace(',', '.')));
+					console.log(rateUSDVEFSicad2);
+					    if(typeof callback === "function") {
+						callback(opt);
+					    };
+					return false;
+				};	
+			});
+		}
+	});
+};
+
 function updateRates(){
 	getExRate(["EURUSD","USDVEF","USDCOP"]); 
 };
 
-function getTotalInput(){
-	console.log("TOTAL INPUT");
+function getTotalInput(callback){
+	console.log("GET TOTAL INPUT");
 	var countArr = {};
 	var cVal = NaN;
 	var cCur = '';
 	$.each($("#inputTable tbody tr:first .fromCur option"),function(key,val){
 		cCur=$(val).val();
-		console.log(cCur);
+		//console.log(cCur);
 		countArr[cCur]=0;
 	});
 	$.each($('#inputTable').find(".inputAmount"),function(i,val){
 		cVal=$(val).val();
+console.log(i);
+console.log(cVal);
 		cCur=$($(val).parent().parent().find('.fromCur')).val();	
 		if($.isNumeric(cVal)){
 			countArr[cCur] = countArr[cCur]+parseFloat(cVal);
 		};
 	});
-	return countArr;
+
+    if(typeof callback === "function") {
+        callback(countArr);
+    };
+
+//TODO : problème d'ordre dans l'affichage du total
 };
 
 $(".totalInput").click(function(){
-	console.log(getTotalInput());
+	getTotalInput(displayTotalInput);
 });
 
 function getTotalOutput(){

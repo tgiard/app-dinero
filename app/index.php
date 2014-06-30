@@ -28,22 +28,14 @@
 
         <div class="container">
             <div class="header">
-                <ul class="nav nav-pills pull-right">
-                    <li class="active"><a href="#">Home</a></li>
-                    <li><a href="#">About</a></li>
-                    <li><a href=d "#">Contact</a></li>
-                </ul>
-                <h3 class="text-muted">app dinero</h3>
-            </div>
-
 <button type="button" class="btn btn-default btn-success update">Update Rates</button>
-
 <button type="button" class="btn btn-default btn-success totalInput">Total Input</button>
 <button type="button" class="btn btn-default btn-success totalOutput">Total Output</button>
+            </div>
 
-<button type="button" class="btn btn-default btn-success" id="bAddRow">
-	<span class="glyphicon glyphicon-plus"></span>
-</button>
+
+
+<div id="mainPanel">
 
 <div class="table-responsive" contenteditable="true">
   <table class="table" id="inputTable" contenteditable="false">
@@ -101,19 +93,18 @@
 	</tr>
 </tbody>
   </table>
+
+<center>
+	<button type="button" class="btn btn-default btn-success" id="bAddRow">
+		<span class="glyphicon glyphicon-plus"></span>
+	</button>
+</center>
 </div>
 
-            <div class="jumbotron" id="mainPanel">
-                <h1>Viaje vs Dinero</h1>
-                <p class="lead">Planifica tu viaje economicamente.</p>
-		<p><label class="control-label" for="inputSuccess2">Cuantos Euros tiene?</label></p>
-		<p><input type="text" class="testClass" id="inputSuccess2">€</p>
-		<p><label id="amountConv"></label>$</p>
             </div>
 
 
             <div class="footer">
-                <p>Youpiyoupiyéé	</p>
             </div>
 
         </div>
