@@ -29,25 +29,63 @@
         <div class="container">
             <div class="header">
 <button type="button" class="btn btn-default btn-success update">Update Rates</button>
-<button type="button" class="btn btn-default btn-success totalInput">Total Input</button>
-<button type="button" class="btn btn-default btn-success totalOutput">Total Output</button>
+<button type="button" class="btn btn-default btn-success totalInput">Total</button>
             </div>
 
 
 
 <div id="mainPanel">
+<div class="table-responsive" contenteditable="false">
+  <table class="table" id="totalTable" contenteditable="false">
+	<thead>
+		<tr>
+			<th></th>
+			<th>VEF</th>
+			<th>EUR</th>
+			<th>USD</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="rowTotalInput">
+			<td>INPUT</td>
+			<td class='VEF'>0</td>
+			<td class='EUR'>0</td>
+			<td class='USD'>0</td>
+		</tr>
+		<tr id="rowTotalOutput">
+			<td>OUTPUT</td>
+			<td class='VEF'>0</td>
+			<td class='EUR'>0</td>
+			<td class='USD'>0</td>
+		</tr>
+		<tr id="rowTotalCur">
+			<td>TOTAL CUR</td>
+			<td class='VEF'>0</td>
+			<td class='EUR'>0</td>
+			<td class='USD'>0</td>
+		</tr>
+		<tr id="rowTotal">
+			<td>TOTAL</td>
+			<td class='VEF'>0</td>
+			<td class='EUR'>0</td>
+			<td class='USD'>0</td>
+		</tr>
+	</tbody>
+</table>
+</div>
 
 <div class="table-responsive" contenteditable="true">
   <table class="table" id="inputTable" contenteditable="false">
 <thead>
 	<tr contenteditable="false">
 	  <th>OBJECT</th>
+	  <th>+</th>
 	  <th>INPUT</th>
 	  <th>CUR</th>
 	  <th>OUTPUT</th> 
 	  <th>CUR</th>
 	  <th>TYPE</th>
-	  <!--<the>COMMENT</th>-->
+	  <!--<th>COMMENT</th>-->
 	  <th>DELETE</th>
 	</tr>
 </thead>
@@ -61,6 +99,9 @@
 				<option value='creditcard'>Cupo Tarjeta Credito</option>
 				<option value='other' contenteditable="true">Otro</option>
 			</select>
+		</td>
+	  	<td class="input">
+			<input type="checkbox" name="ingress" value="+" class="in isIngress curChoice" id='ingress1' checked><br>
 		</td>
 	  	<td class="input">
 			<input type='text' class="in inputAmount Amount" id='input1' ></input>

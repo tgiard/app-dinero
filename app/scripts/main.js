@@ -34,20 +34,25 @@ function getRates(){
 			})
 		});
 	}).done(function(){
-		//constructInputTable(getTotalInput(displayTotalInput));
-		constructInputTable(getTotalInput());
+		constructInputTable();
 		displayRates();
 	});
 };
 
 $(window).unload(function() {
 	var arr = {};
+	var cVal = '';
 	$.cookie("arrInput",{});
 	$.each($("#inputTable tbody").find("tr"),function(i,row){
 		console.log(i);
 		arr[i]={};
 		$.each($(row).find(".in"),function(j,col){
-			arr[i][$(col).attr('id')]=$(col).val();
+			if($(col).attr('name')!='ingress'){
+				cVal = $(col).val();
+			}else{
+				cVal = $(col).is(':checked');
+			};
+			arr[i][$(col).attr('id')]=cVal;
 		});
 	});
 	$.cookie("arrInput",JSON.stringify(arr));
@@ -57,7 +62,7 @@ window.onload = function() {
 	getRates();
 };
 
-function constructInputTable(callback){
+function constructInputTable(){
 	var cId = -1;
 	var cIdStr = "";
 	if($.cookie("arrInput") != null){
@@ -65,9 +70,14 @@ function constructInputTable(callback){
 		$.each(arrInput,function(i,v){
 	//	console.log(i);
 			if(i!=0) addRow();
-			$.each(v,function(i1,v1){				
-				$("#inputTable").find("#"+i1).val(v1);
-	//			console.log(i+" - "+i1+" - "+v1);
+			$.each(v,function(i1,v1){
+				if($("#inputTable").find("#"+i1).attr('name')!='ingress'){					
+					$("#inputTable").find("#"+i1).val(v1);
+				}else{				
+					$("#inputTable").find("#"+i1).prop('checked',v1);
+				};
+			//console.log($("#inputTable").find("#"+i1));
+			//console.log(i+" - "+i1+" - "+v1);		
 			});
 		});
 		$.each($("#inputTable").find(".inputAmount"),function(i,val){
@@ -75,10 +85,6 @@ function constructInputTable(callback){
 		});
 		console.log("Not First Load");
 	};
-
-    if(typeof callback === "function") {
-        callback();
-    };
 };
 
 var focusInput = function(){
@@ -89,7 +95,7 @@ var blurInput = function(){
   $(this).css("background-color","#ffffff");
 };
 
-function modifyInput(ob){
+function modifyInput(ob,callback){
 	var par = $(ob).parent().parent(); //tr
 	//console.log($(par));
 	var cAmount = $(par).find(".inputAmount").val();
@@ -106,6 +112,10 @@ function modifyInput(ob){
 	}else{		
 		$(par).find(".outputAmount").text('');
 	};
+
+    if(typeof callback === "function") {
+        callback();
+    };
 };
 
 function removeRow(){
@@ -123,7 +133,7 @@ function newRowBind(){
 	$(".inputAmount").bind("focus", focusInput);
 	$(".inputAmount").bind("blur", blurInput);
 	$(".inputAmount").on('input',function(){	
-		modifyInput(this);	
+		modifyInput(this,getTotalInput);	
 	});
 	
 	$(".bRemoveRow").unbind();
@@ -152,6 +162,8 @@ var addRow = function(){
 	$("#inputTable tbody tr:last").find(".changeType").attr('id',idStr);
 	idStr = "object"+nbPost;
 	$("#inputTable tbody tr:last").find(".inputObject").attr('id',idStr);
+	idStr = "ingress"+nbPost;
+	$("#inputTable tbody tr:last").find(".isIngress").attr('id',idStr);
 
 	$("#inputTable tbody tr:last").append("<td><button type='button' class='btn btn-xs btn-danger bRemoveRow' id='remove"+nbPost+"'><span class='glyphicon glyphicon-trash'></span></button></td>")
 
@@ -185,57 +197,13 @@ function displayRates(){
 	var items = [];
 	items.push("<center>");
 	items.push("$ Paralelo : " + (rates['paralelo']['USD']['VEF']).toFixed(2)+" ---- ");
+	items.push("$ Sicad : " + (rates['sicad']['USD']['VEF']).toFixed(2)+" ---- "); 
 	items.push("$ Sicad 2 : " + (rates['sicad2']['USD']['VEF']).toFixed(2)+" ---- "); 
-	items.push("$ Oficial : " + (rates['oficial']['USD']['VEF']).toFixed(2));
+	items.push("$ Oficial : " + (rates['oficial']['USD']['VEF']).toFixed(2)+" ---- ");
+	items.push("€/$ : " + (rates['oficial']['EUR']['USD']).toFixed(2));
 	items.push("</center>");
 	  	$( "<div/>", {
 	    		"class": "my-new-list",
-	    		html: items.join( "" )
-	  	}).prependTo( "#mainPanel" );
-};
-
-function displayTotalInput(arr){
-	var items = [];
-	console.log("DISPLAY TOTAL INPUT");
-	console.log(arr);
-	items.push("TOTAL INPUT");
-	items.push("<table class='table' id='InputTotalTable' contenteditable='false'><thead><tr>");
-	$.each(arr,function(i,v){		
-		items.push("<td>"+ i +"</td>");
-	});
-	items.push("</tr></thead><tbody><tr>");
-	$.each(arr,function(i,v){		
-		items.push("<td>"+ v +"</td>");
-	});
-	items.push("</tr></table></tbody>");
-
-	  	$( "<div/>", {
-	    		"class": "totalInput",
-	    		html: items.join( "" )
-	  	}).prependTo( "#mainPanel" );
-
-    if(typeof callback === "function") {
-        callback();
-    };
-};
-
-function displayTotalOutput(){
-	var items = [];
-	var arr = getTotalOutput();
-	console.log(arr);
-	items.push("TOTAL OUTPUT");
-	items.push("<table class='table' id='InputTotalTable' contenteditable='false'><thead><tr>");
-	$.each(arr,function(i,v){		
-		items.push("<td>"+ i +"</td>");
-	});
-	items.push("</tr></thead><tbody><tr>");
-	$.each(arr,function(i,v){		
-		items.push("<td>"+ v +"</td>");
-	});
-	items.push("</tr></table></tbody>");
-
-	  	$( "<div/>", {
-	    		"class": "totalInput",
 	    		html: items.join( "" )
 	  	}).prependTo( "#mainPanel" );
 };
@@ -418,59 +386,82 @@ function updateRates(){
 	getExRate(["EURUSD","USDVEF","USDCOP"]); 
 };
 
-function getTotalInput(callback){
+function getTotalInput(){
 	console.log("GET TOTAL INPUT");
 	var countArr = {};
+	countArr['input'] = {};
+	countArr['output'] = {};
+	countArr['total'] = {};
 	var cVal = NaN;
 	var cCur = '';
-	$.each($("#inputTable tbody tr:first .fromCur option"),function(key,val){
-		cCur=$(val).val();
-		//console.log(cCur);
-		countArr[cCur]=0;
-	});
-	$.each($('#inputTable').find(".inputAmount"),function(i,val){
-		cVal=$(val).val();
-console.log(i);
-console.log(cVal);
-		cCur=$($(val).parent().parent().find('.fromCur')).val();	
-		if($.isNumeric(cVal)){
-			countArr[cCur] = countArr[cCur]+parseFloat(cVal);
-		};
-	});
-
-    if(typeof callback === "function") {
-        callback(countArr);
-    };
-
-//TODO : problème d'ordre dans l'affichage du total
-};
-
-$(".totalInput").click(function(){
-	getTotalInput(displayTotalInput);
-});
-
-function getTotalOutput(){
-	console.log("TOTAL OUTPUT");
-	var countArr = {};
-	var cVal = NaN;
-	var cCur = '';
+	var cIdStr = '';
+	var isChecked = '';
 	$.each($("#inputTable tbody tr:first .fromCur option"),function(key,val){
 		cCur=$(val).val();
 		console.log(cCur);
-		countArr[cCur]=0;
+		countArr['input'][cCur]=0;
+		countArr['output'][cCur]=0;
+		countArr['total'][cCur]=0;
+		cIdStr = "#totalTable tbody #rowTotalInput ."+cCur;
+		$(cIdStr).text(0);
+		cIdStr = "#totalTable tbody #rowTotalOutput ."+cCur;
+		$(cIdStr).text(0);
+		cIdStr = "#totalTable tbody #rowTotal ."+cCur;
+		$(cIdStr).text(0);
+	});
+	$.each($('#inputTable').find(".inputAmount"),function(i,val){
+		cVal=$(val).val();
+		cCur=$($(val).parent().parent().find('.fromCur')).val();	
+		if($.isNumeric(cVal)){	
+			isChecked = $(val).parent().parent().find('.isIngress').is(':checked');
+			if(isChecked){
+				cVal = parseFloat(cVal);
+				countArr['input'][cCur] = countArr['input'][cCur]+cVal;
+			};
+		};
 	});
 	$.each($('#inputTable').find(".outputAmount"),function(i,val){
 		cVal=$(val).text();
 		cCur=$($(val).parent().parent().find('.toCur')).val();	
-		if($.isNumeric(cVal)){
-			countArr[cCur] = countArr[cCur]+parseFloat(cVal);
+		if($.isNumeric(cVal)){	
+			cVal = parseFloat(cVal);
+			countArr['output'][cCur] = countArr['output'][cCur]+cVal;
 		};
 	});
-	return countArr;
+	$.each(countArr['input'],function(i,v){
+		cIdStr = "#totalTable tbody #rowTotalInput ."+i;	
+		$(cIdStr).text(v.toFixed(2));
+		countArr['total'][i]=v-countArr['output'][i];			
+	});
+	$.each(countArr['output'],function(i,v){
+		cIdStr = "#totalTable tbody #rowTotalOutput ."+i;
+		$(cIdStr).text(v.toFixed(2));			
+	});
+	$.each(countArr['total'],function(i,v){
+		cIdStr = "#totalTable tbody #rowTotalCur ."+i;
+		$(cIdStr).text(v.toFixed(2));			
+	});
+	var count = 0;
+	var to = '';
+	var from = '';
+	var cRate = -1;
+	$.each(countArr['total'],function(i,v){
+		count = 0;
+		to = i;
+		$.each(countArr['total'],function(i1,v1){
+			from = i1;
+			cRate = rates['paralelo'][from][to];
+			count = count + v1*cRate; 			
+			//console.log(from + ' - '+to+' at '+cRate+' : '+v1 +' = '+count);
+		});	
+			cIdStr = "#totalTable tbody #rowTotal ."+i;
+			$(cIdStr).text(count.toFixed(2));
+	});
+	
 };
 
-$(".totalOutput").click(function(){
-	console.log(getTotalOutput());
+$(".totalInput").click(function(){
+	getTotalInput();
 });
 
 
