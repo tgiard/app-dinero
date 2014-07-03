@@ -1,477 +1,146 @@
 
 $(document).ready(function(){
 
-$('.update').click(function(e){ 
-	updateRates();	
-});
+var divKey = "divisas";
+var otroKey = "otro";
+var actionTypeArr = {"buydiv":divKey, "selldiv":divKey, "buyany":otroKey};
+var actionArr = {"Compro Divisas":"buydiv", "Vendo Divisas":"selldiv", "Compro ...":"buyany"};
+var objectArr = {};
+objectArr[divKey] = ["Viajero", "Internet", "Tarjeta de creidto","Paralelo"];
+objectArr[otroKey] = ["Avion","Maleta","Otro"];
+var rateTypeArr = ["Oficial","Sicad I","Sicad II","Paralelo"];
+var curArr = ["VEF","USD","EUR"];
 
+//BINDING
+$(".inputAction").change(changeAction);
 
+initPage();
 
+function initPage(){
+	loadChoices(actionArr,$(".inputAction"),0);
+	loadChoices(rateTypeArr,$(".rateType"));
+	loadChoices(curArr,$(".curChoice"));
+//TODO : il lance deux fois changeAction... 
+	$(".inputAction").trigger('change');
+};
 
-var ratesYahoo = {};
-var nbPost = 1;
-var amountArr = [];
-var objects = [];
-var types = [];
-var cur = [];
-var rates=[];
-var rssXMLCucuta = "http://feeds.feedburner.com/Bolivarcucuta?format=xml";
-var rssXMLSicad2 = "http://feeds.feedburner.com/Dolarsicad?format=xml";
-var rateCOPBOLCu = -1;
-var rateUSDVEFSicad2 = -1;
-var rateUSDVEFSicad1 = 10.60;
-var initNbRow = 5;
+function loadChoices(arr,loc,display){
+/*
+display = 2 : show the value on the option and set the value as the value 
+display = 1 : show the value on the option and set the index as the value 
+display = 0 : show the index on the option and set the value as the value
+*/
 
-function getRates(){
-	$.getJSON("../rates.json", function(data){
-		$.each(data, function (index, value) {
-			rates[index]={};
-		    	$.each(value, function (index1, value1) {
-				rates[index][index1]={};
-		    		$.each(value1, function (index2, value2) {
-					rates[index][index1][index2]=value2;
-				})
-			})
-		});
-	}).done(function(){
-		constructInputTable();
-		displayRates();
+	console.log("\n---------- LOADING CHOICES ----------");
+	console.log("LOCATION : ");
+	console.log(loc);
+	console.log("ARRAY : ");
+	console.log(arr);
+	var val = '';
+	var option = '';	
+	var obj = null;
+	console.log("*** EMPTYING LOCATION ***");
+	loc.empty();
+	console.log("OPTIONS : ");
+	$.each(arr,function(i,v){
+		switch(display) {
+		    case 0:
+			val = v;
+			option = i;
+			break;
+		    case 1:
+			val = i;
+			option = v;
+			break;
+		    case 2:
+			val = v;
+			option = v;
+			break;
+		    default:
+			val = v;
+			option = v;
+		}
+		console.log("option : "+option+" --- value : "+val);
+		obj = 	$( "<option/>", {
+				value : val,
+	    			html: option
+	  		})
+		obj.appendTo( loc );
 	});
+	console.log("---------- END LOADING CHOICES ----------\n");
 };
 
-$(window).unload(function() {
-	var arr = {};
-	var cVal = '';
-	$.cookie("arrInput",{});
-	$.each($("#inputTable tbody").find("tr"),function(i,row){
-		console.log(i);
-		arr[i]={};
-		$.each($(row).find(".in"),function(j,col){
-			if($(col).attr('name')!='ingress'){
-				cVal = $(col).val();
-			}else{
-				cVal = $(col).is(':checked');
-			};
-			arr[i][$(col).attr('id')]=cVal;
-		});
-	});
-	$.cookie("arrInput",JSON.stringify(arr));
-});
+function changeAction(){
+	console.log("\n---------- ACTION CHANGED ----------");
+	var cAction = $(this).val();
+	var cKey = actionTypeArr[cAction];
 
-window.onload = function() {
-	getRates();
-};
+	console.log("*** OBJECTS ***");
+	var cArr = objectArr[cKey];
+	var cPar = $(this).parents(".divPost");
+	var cLoc = cPar.find(".inputObject");
+	console.log("type of action : " + cKey);
+	console.log("LOCATION : ");
+	console.log(cLoc);
+	console.log("ARRAY : ");
+	console.log(cArr);
+	loadChoices(cArr,cLoc);
 
-function constructInputTable(){
-	var cId = -1;
-	var cIdStr = "";
-	if($.cookie("arrInput") != null){
-		var arrInput = JSON.parse($.cookie("arrInput"));
-		$.each(arrInput,function(i,v){
-	//	console.log(i);
-			if(i!=0) addRow();
-			$.each(v,function(i1,v1){
-				if($("#inputTable").find("#"+i1).attr('name')!='ingress'){					
-					$("#inputTable").find("#"+i1).val(v1);
-				}else{				
-					$("#inputTable").find("#"+i1).prop('checked',v1);
-				};
-			//console.log($("#inputTable").find("#"+i1));
-			//console.log(i+" - "+i1+" - "+v1);		
-			});
-		});
-		$.each($("#inputTable").find(".inputAmount"),function(i,val){
-			$(val).trigger("input");
-		});
-		console.log("Not First Load");
-	};
-};
-
-var focusInput = function(){
-  $(this).css("background-color","#cccccc");
-};
-
-var blurInput = function(){
-  $(this).css("background-color","#ffffff");
-};
-
-function modifyInput(ob,callback){
-	var par = $(ob).parent().parent(); //tr
-	//console.log($(par));
-	var cAmount = $(par).find(".inputAmount").val();
-	if($.isNumeric(cAmount)){
-		var cFromCur = $(par).find(".fromCur").val();
-//		console.log("from cur : " + cFromCur);
-		var cToCur = $(par).find(".toCur").val();
-//		console.log("to cur : " + cToCur);
-		var cType = $(par).find(".changeType").val();
-//		console.log("type : " + cType);
-		var cRate = rates[cType][cFromCur][cToCur];
-		var cOutput = cAmount*cRate;
-		$(par).find(".outputAmount").text(cOutput.toFixed(2));
-	}else{		
-		$(par).find(".outputAmount").text('');
+	console.log("*** RATE TYPE NEEDED ? ***");	
+	var cLoc = cPar.find(".rateType");
+	console.log("LOCATION : ");
+	console.log(cLoc);
+	if(cKey==divKey){
+		cLoc.prop('disabled', false);
+		cLoc.parent().children("label").css("color", "#000000");
+	}else{
+		cLoc.prop('disabled', true);
+		cLoc.parent().find("label").css("color", "#ababab");
+		cLoc.val("Oficial");
 	};
 
-    if(typeof callback === "function") {
-        callback();
-    };
+
+	console.log("*** LABELS  ***");	
+	var cLoc = cPar.find(".inputLabel");
+	var text = '';
+	console.log("LOCATION : ");
+	console.log(cLoc);
+	if(cAction=="buydiv"){
+		text="Compro";
+	}else if(cAction=="selldiv"){
+		text="Vendo";
+	}else if(cAction=="buyany"){
+		text="Precio";
+	};
+	cLoc.text(text);
+
+	var cLoc = cPar.find(".outputLabel");
+	console.log("LOCATION : ");
+	console.log(cLoc);
+	if(cAction=="buydiv"){
+		text="A";
+	}else if(cAction=="selldiv"){
+		text="A";
+	}else if(cAction=="buyany"){
+		text="";
+	};
+	cLoc.text(text);
+	if(cKey==divKey){
+		cLoc.prop('disabled', false);
+	}else{
+		cLoc.prop('disabled', true);
+		cLoc.val("Oficial");
+	};
+	var cLoc = cPar.find(".toCur");
+	if(cKey==divKey){
+		cLoc.prop('disabled', false);
+	}else{
+		cLoc.prop('disabled', true);
+		cLoc.val("VEF");
+	};
+
+	console.log("---------- END ACTION CHANGED ----------\n");
 };
 
-function removeRow(){
-	var par = $(this).parent().parent(); //tr
-	/*$.each($(par).find(".in"), function(key,val){
-		console.log($(val).attr("id"));
-		$.cookie($(val).attr("id"),null);
-		});*/
-	par.remove();
-	nbPost--;	
-};
-
-function newRowBind(){
-	$(".inputAmount").unbind();
-	$(".inputAmount").bind("focus", focusInput);
-	$(".inputAmount").bind("blur", blurInput);
-	$(".inputAmount").on('input',function(){	
-		modifyInput(this,getTotalInput);	
-	});
-	
-	$(".bRemoveRow").unbind();
-	$(".bRemoveRow").bind("click",removeRow);
-
-	$(".curChoice").unbind();
-	$(".curChoice").change(function(){	
-		$(this).parent().parent().children(".input").children().trigger("input");
-	});
-}
-
-var addRow = function(){
-//TODO : automatisé l'attribution des ids en fonction des ids des objects de base avec un regex
-	nbPost++;
-	var idStr = "";
-	$("#inputTable tbody tr:first").clone().appendTo("#inputTable");
-	$("#inputTable tbody tr:last").find(".inputAmount").val('');
-	$("#inputTable tbody tr:last").find(".outputAmount").text('');
-	idStr = "input"+nbPost;
-	$("#inputTable tbody tr:last").find(".inputAmount").attr('id',idStr);
-	idStr = "fc"+nbPost;
-	$("#inputTable tbody tr:last").find(".fromCur").attr('id',idStr);
-	idStr = "tc"+nbPost;
-	$("#inputTable tbody tr:last").find(".toCur").attr('id',idStr);
-	idStr = "type"+nbPost;
-	$("#inputTable tbody tr:last").find(".changeType").attr('id',idStr);
-	idStr = "object"+nbPost;
-	$("#inputTable tbody tr:last").find(".inputObject").attr('id',idStr);
-	idStr = "ingress"+nbPost;
-	$("#inputTable tbody tr:last").find(".isIngress").attr('id',idStr);
-
-	$("#inputTable tbody tr:last").append("<td><button type='button' class='btn btn-xs btn-danger bRemoveRow' id='remove"+nbPost+"'><span class='glyphicon glyphicon-trash'></span></button></td>")
-
-	newRowBind();
-};
-
-newRowBind();
-$("#bAddRow").click(addRow);
-
-//RATES FROM YAHOO
-
-var displayArr = function(arr,loc){
-		var items = [];
-		var iId = 1;
-		var strId = "rate" + iId;
-		var strKeyId = "rateKey" + iId;
-		items.push(" --- ");
-		$.each(arr, function(key,val){
-			items.push( "<label id='" + strKeyId + "'>" + key + "</label> : <label id='" + strId + "'>" + val + "</label> --- " );
-			iId = iId+1;
-			strId = "rate" + iId;
-		});
-	 
-	  	$( "<div/>", {
-	    		"class": "my-new-list",
-	    		html: items.join( "" )
-	  	}).prependTo( loc );
-};
-
-function displayRates(){
-	var items = [];
-	items.push("<center>");
-	items.push("$ Paralelo : " + (rates['paralelo']['USD']['VEF']).toFixed(2)+" ---- ");
-	items.push("$ Sicad : " + (rates['sicad']['USD']['VEF']).toFixed(2)+" ---- "); 
-	items.push("$ Sicad 2 : " + (rates['sicad2']['USD']['VEF']).toFixed(2)+" ---- "); 
-	items.push("$ Oficial : " + (rates['oficial']['USD']['VEF']).toFixed(2)+" ---- ");
-	items.push("€/$ : " + (rates['oficial']['EUR']['USD']).toFixed(2));
-	items.push("</center>");
-	  	$( "<div/>", {
-	    		"class": "my-new-list",
-	    		html: items.join( "" )
-	  	}).prependTo( "#mainPanel" );
-};
-
-function fillTables(callback){
-	console.log("filling tables");
-	rates={};
-	var cCur = '';
-	var cType = '';
-	$.each($("#inputObject option"),function(key,val){
-		objects[key]=$(val).val();
-	});
-	$.each($(".changeType option"),function(key,val){
-		cType=$(val).val();	
-		types[key]=cType;
-		rates[cType]={};
-	});
-	$.each($(".fromCur option"),function(key,val){
-		cCur=$(val).val()
-		cur[key]=cCur;
-		$.each(rates,function(key,val){
-			rates[key][cCur]={};
-		});
-	});
-	rates['oficial']['EUR']['USD']=ratesYahoo['EURUSD'];
-	rates['oficial']['USD']['EUR']=1/ratesYahoo['EURUSD'];
-	rates['oficial']['USD']['VEF']=ratesYahoo['USDVEF'];
-	rates['oficial']['VEF']['USD']=1/ratesYahoo['USDVEF'];
-	rates['oficial']['EUR']['VEF']=ratesYahoo['EURUSD']*ratesYahoo['USDVEF'];
-	rates['oficial']['VEF']['EUR']=1/(ratesYahoo['EURUSD']*ratesYahoo['USDVEF']);
-	rates['oficial']['VEF']['VEF']=1;
-	rates['oficial']['EUR']['EUR']=1;
-	rates['oficial']['USD']['USD']=1;
-	$.each(rates['oficial'],function(key,val){
-		$.each(val,function(key1,val1){
-			rates['paralelo'][key][key1]=val1;		
-			rates['sicad'][key][key1]=val1;
-			rates['sicad2'][key][key1]=val1;				
-		});	
-	});
-	rates['paralelo']['USD']['VEF']=ratesYahoo['USDCOP']*1.04/rateCOPBOLCu;
-	rates['paralelo']['VEF']['USD']=1/rates['paralelo']['USD']['VEF'];
-	rates['paralelo']['EUR']['VEF']=rates['paralelo']['USD']['VEF']*rates['oficial']['EUR']['USD'];
-	rates['paralelo']['VEF']['EUR']=1/rates['paralelo']['EUR']['VEF'];
-
-	rates['sicad']['USD']['VEF']=rateUSDVEFSicad1;
-	rates['sicad']['VEF']['USD']=1/rates['sicad']['USD']['VEF'];
-	rates['sicad']['EUR']['VEF']=rateUSDVEFSicad1*ratesYahoo['EURUSD'];
-	rates['sicad']['VEF']['EUR']=1/rates['sicad']['EUR']['VEF'];
-
-
-	rates['sicad2']['USD']['VEF']=rateUSDVEFSicad2;
-	rates['sicad2']['VEF']['USD']=1/rates['sicad2']['USD']['VEF'];
-	rates['sicad2']['EUR']['VEF']=rateUSDVEFSicad2*ratesYahoo['EURUSD'];
-	rates['sicad2']['VEF']['EUR']=1/rates['sicad2']['EUR']['VEF'];
-//$.each(rates,function(key0,val0){
-//	$.each(val0,function(key,val){
-//		$.each(val,function(key1,val1){
-//			console.log(key0+"-"+key+"-"+key1+" : "+val1);		
-//		});	
-//	});
-//});
-
-    if(typeof callback === "function") {
-        callback();
-    };
-};
-
-function saveRatesToFile(){
-	console.log("saving to file");
-			var dataString = "jsonObject="+JSON.stringify(rates,null,'\t');
- 
-			$.ajax({
-      			type: "POST",
-      			url: "save.php",
-      			data: dataString,
- 
-      				success: function() {
-						alert("Rates saved in file");
-						location.reload();
-         				}
-			});
-			return false;
-};
-
-var getExRate = function(arrayCur){
-	//String Currency Construction
-	var r = $.Deferred();
-	var stringCur = "";
-	var nbCur = arrayCur.length;
-	$.each(arrayCur, function(key,value){
-		stringCur = stringCur + "%22" + value + "%22";
-		if(key+1 != nbCur){
-			stringCur = stringCur + "%2C";
-		}
-	});
-
-	//Call to Yahoo Finances
-	var flickerAPI = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20in%20("+stringCur+")&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
-	console.log("getting ratesYahoo...");
-	  $.getJSON( flickerAPI, {
-	    tags: "test yahoo",
-	    tagmode: "any",
-	    format: "json"
-	  })
-	    	.done(function( data ) {
-			$.each(data.query.results.rate, function(i,val){
-				ratesYahoo[val.id] = parseFloat(val.Rate);
-			});	
-			getRSS(fillTables,saveRatesToFile);		
-			//fillTables(saveRatesToFile);
-	    	})
-	  	.fail(function() {
-	    		console.log( "error" );
-			return false;
-	  	});
-	console.log("ratesYahoo ok!");
-};
-
-function getRSS(callback,opt){
-	console.log('RSS');
-	var url = rssXMLCucuta;
-	var str = '';
-	$.ajax({
-		type: "GET",
-		url: document.location.protocol + '//ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=1000&callback=?&q=' + encodeURIComponent(url),
-		dataType: 'json',
-		error: function(){
-			alert('Unable to load feed, Incorrect path or invalid feed');
-		},
-		success: function(xml){
-			values = xml.responseData.feed.entries;
-			$.each(values,function(key,val){
-				str = val['title'];
-				var n = str.search("Precio del Bolívar");	
-				if(n>=0){
-					var strTest = "Compra: ";
-					n = str.search(strTest);	
-					console.log(str);	
-					var start = n+strTest.length;
-					rateCOPBOLCu = parseFloat(str.substring(start,start+5));
-					console.log(rateCOPBOLCu);
-					return false;
-				};	
-			});
-		}
-	});
-	url = rssXMLSicad2;
-	str = '';
-	$.ajax({
-		type: "GET",
-		url: document.location.protocol + '//ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=1000&callback=?&q=' + encodeURIComponent(url),
-		dataType: 'json',
-		error: function(){
-			alert('Unable to load feed, Incorrect path or invalid feed');
-		},
-		success: function(xml){
-			values = xml.responseData.feed.entries;
-			$.each(values,function(key,val){
-				str = val['title'];	
-				var n = str.search("Tasa Sicad 2 cerró");	
-				if(n>=0){
-					var strTest = "BsF. ";
-					n = str.search(strTest);	
-					console.log(str);	
-					var start = n+strTest.length;
-					rateUSDVEFSicad2 = parseFloat((str.substring(start,start+5).replace(',', '.')));
-					console.log(rateUSDVEFSicad2);
-					    if(typeof callback === "function") {
-						callback(opt);
-					    };
-					return false;
-				};	
-			});
-		}
-	});
-};
-
-function updateRates(){
-	getExRate(["EURUSD","USDVEF","USDCOP"]); 
-};
-
-function getTotalInput(){
-	console.log("GET TOTAL INPUT");
-	var countArr = {};
-	countArr['input'] = {};
-	countArr['output'] = {};
-	countArr['total'] = {};
-	var cVal = NaN;
-	var cCur = '';
-	var cIdStr = '';
-	var isChecked = '';
-	$.each($("#inputTable tbody tr:first .fromCur option"),function(key,val){
-		cCur=$(val).val();
-		console.log(cCur);
-		countArr['input'][cCur]=0;
-		countArr['output'][cCur]=0;
-		countArr['total'][cCur]=0;
-		cIdStr = "#totalTable tbody #rowTotalInput ."+cCur;
-		$(cIdStr).text(0);
-		cIdStr = "#totalTable tbody #rowTotalOutput ."+cCur;
-		$(cIdStr).text(0);
-		cIdStr = "#totalTable tbody #rowTotal ."+cCur;
-		$(cIdStr).text(0);
-	});
-	$.each($('#inputTable').find(".inputAmount"),function(i,val){
-		cVal=$(val).val();
-		cCur=$($(val).parent().parent().find('.fromCur')).val();	
-		if($.isNumeric(cVal)){	
-			isChecked = $(val).parent().parent().find('.isIngress').is(':checked');
-			if(isChecked){
-				cVal = parseFloat(cVal);
-				countArr['input'][cCur] = countArr['input'][cCur]+cVal;
-			};
-		};
-	});
-	$.each($('#inputTable').find(".outputAmount"),function(i,val){
-		cVal=$(val).text();
-		cCur=$($(val).parent().parent().find('.toCur')).val();	
-		if($.isNumeric(cVal)){	
-			cVal = parseFloat(cVal);
-			countArr['output'][cCur] = countArr['output'][cCur]+cVal;
-		};
-	});
-	$.each(countArr['input'],function(i,v){
-		cIdStr = "#totalTable tbody #rowTotalInput ."+i;	
-		$(cIdStr).text(v.toFixed(2));
-		countArr['total'][i]=v-countArr['output'][i];			
-	});
-	$.each(countArr['output'],function(i,v){
-		cIdStr = "#totalTable tbody #rowTotalOutput ."+i;
-		$(cIdStr).text(v.toFixed(2));			
-	});
-	$.each(countArr['total'],function(i,v){
-		cIdStr = "#totalTable tbody #rowTotalCur ."+i;
-		$(cIdStr).text(v.toFixed(2));			
-	});
-	var count = 0;
-	var to = '';
-	var from = '';
-	var cRate = -1;
-	$.each(countArr['total'],function(i,v){
-		count = 0;
-		to = i;
-		$.each(countArr['total'],function(i1,v1){
-			from = i1;
-			cRate = rates['paralelo'][from][to];
-			count = count + v1*cRate; 			
-			//console.log(from + ' - '+to+' at '+cRate+' : '+v1 +' = '+count);
-		});	
-			cIdStr = "#totalTable tbody #rowTotal ."+i;
-			$(cIdStr).text(count.toFixed(2));
-	});
-	
-};
-
-$(".totalInput").click(function(){
-	getTotalInput();
-});
-
-
-//$.ajax({  
-//  url: 'http://bolivarcucuta.com/',
-//  type: 'GET',
-//  dataType: 'html',
-//  data: null,
-//  success: 	function(html) {alert("success");
-//		}
-//});
 
 });
