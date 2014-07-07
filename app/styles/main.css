@@ -9,6 +9,7 @@
 body {
     padding-top: 20px;
     padding-bottom: 20px;
+	background-color:#00a2ea;
 }
 
 /* Everything but the jumbotron gets side spacing for mobile first views */
@@ -115,13 +116,22 @@ body {
  .select-editable select:focus, .select-editable input:focus {
      outline:none;
  }
-.divPost {
+.blockPost {
 	display:inline-block;
-	width: 45%;
+	width: 60%;
 	margin-left: 0.1cm;
 	margin-right: 0.1cm;
 }
-
+.blockTotal {
+	margin-top: 100px;
+	margin-left: 40%;
+	position:fixed;
+	top:0px;
+	border: 2px solid;
+	border-radius: 5px;
+	padding:10px;
+	background-color:rgba(100,100,100,.5);
+}
 }
 
 

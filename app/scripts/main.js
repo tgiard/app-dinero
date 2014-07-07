@@ -6,7 +6,7 @@ var otroKey = "otro";
 var actionTypeArr = {"buydiv":divKey, "selldiv":divKey, "buyany":otroKey};
 var actionArr = {"Compro Divisas":"buydiv", "Vendo Divisas":"selldiv", "Compro ...":"buyany"};
 var objectArr = {};
-objectArr[divKey] = ["Viajero", "Internet", "Tarjeta de creidto","Paralelo"];
+objectArr[divKey] = ["Viajero", "Internet", "Tarjeta de creidto","Efectivo"];
 objectArr[otroKey] = ["Avion","Maleta","Otro"];
 var rateTypeArr = ["Oficial","Sicad I","Sicad II","Paralelo"];
 var curArr = ["VEF","USD","EUR"];
@@ -19,26 +19,58 @@ var rateUSDVEFSicad2 = -1;
 var rateUSDVEFSicad1 = 10.60;
 
 //BINDING
-$(".inputAction").change(changeAction);
-$(".inputAmount").on('input',function(){	
-	changeInput(this);	
-});
-$(".curChoice").change(function(){	
-	changeInput($(this).parents(".divPost").find(".inputAmount"));	
-});
-$(".rateType").change(function(){	
-	changeInput($(this).parents(".divPost").find(".inputAmount"));	
-});
-$('.update').click(updateRates);	
 initPage();
 
 function initPage(){
+	bindElements();
 	loadChoices(actionArr,$(".inputAction"),0);
 	loadChoices(rateTypeArr,$(".rateType"));
 	loadChoices(curArr,$(".curChoice"));
 //TODO : il lance deux fois changeAction... 
 	$(".inputAction").trigger('change');
 	getRates();
+	$('.update').click(updateRates);
+	$('#bAddPost').click(addPost);	
+	createTotalTable();
+};
+
+function unbindElements(){
+	$(".inputAction").unbind();
+	$(".inputAmount").unbind();
+	$(".curChoice").unbind();
+	$(".rateType").unbind();
+	$(".bRemoveRow").unbind();	
+};
+
+function bindElements(){
+	unbindElements()
+	$(".inputAction").change(changeAction);
+	$(".inputAmount").on('input',function(){	
+		changeInput(this);	
+	});
+	$(".curChoice").change(function(){	
+		changeInput($(this).parents(".divPost").find(".inputAmount"));	
+	});
+	$(".rateType").change(function(){	
+		changeInput($(this).parents(".divPost").find(".inputAmount"));	
+	});
+	$('.bRemoveRow').click(removePost);
+};
+
+function createTotalTable(){
+	console.log("\n---------- CREATING TOTAL TABLE ----------");
+	var cDiv = $(".blockTotal table");
+	var html = [];
+	console.log("table : ");
+	console.log(cDiv);
+	html.push('<thead><th>CUR</th><th>+</th><th>-</th><th>TOT</th></thead><tbody>');
+	$.each(curArr,function(i,v){
+		html.push('<tr><td>'+v+'</td><td>$$$</td><td>$$$</td><th>$$$</th></tr>');
+	});
+	html.push('</tbody>');
+	html.push('<tfoot><th>CUR</th><th>$$$</th><th>$$$</th><th>$$$</th></thead><tfoot>');
+	cDiv.append(html.join(''));
+	console.log("\n---------- END CREATING TOTAL TABLE ----------");
 };
 
 function loadChoices(arr,loc,display){
@@ -180,10 +212,39 @@ function changeInput(e){
 		var cOutput = cAmount*cRate;
 		console.log(cOutput);
 		cPar.find(".outputAmount").val(cOutput.toFixed(2));
+		$(".blockTotal #totalInput").text(cAmount);
 	}else{		
 		cPar.find(".outputAmount").val('');
+		$(".blockTotal #totalInput").text('');
 	};
 };
+
+function addPost(){
+	console.log("\n---------- ADD POST ----------");
+	var firstPost = $(".mainPanel .divPost:first");
+	console.log("*** First Post ***")
+	console.log(firstPost);
+	var cClone = firstPost.clone();
+	console.log("*** Clone Post ***")
+	console.log(cClone);
+	var bRemove = $(cClone).find(".bRemoveRow");
+	$(bRemove).css('visibility','visible');
+	console.log("*** Appending To Main Panel ***")
+	$(".mainPanel .divPost:last").after(cClone);
+	console.log("*** Binding Elements ***")
+	bindElements();
+	console.log("---------- END ADD POST ----------\n");
+};
+
+function removePost(){
+	console.log("\n---------- REMOVE POST ----------");
+	$(this).parents(".divPost").remove();
+	console.log("---------- END REMOVE POST ----------\n");
+};
+
+
+
+
 
 function getRates(){
 	$.getJSON("../rates.json", function(data){
@@ -394,7 +455,6 @@ function getRSS(callback,opt){
 function updateRates(){
 	getExRate(["EURUSD","USDVEF","USDCOP"]); 
 };
-
 
 
 });

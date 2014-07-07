@@ -30,8 +30,8 @@
 	<div class="header">
 	</div>
 
-<div class="mainPanel" style="margin-top:0.5cm" align="center">
-	<div class="panel panel-default divPost">
+<div class="mainPanel" style="margin-top:0.5cm">
+	<div class="panel panel-default divPost blockPost">
 	  	<div class="panel-heading">
 					<p><label>QUE HAGO ?</label>
 					<select class="in inputAction action" style='width:50%;float:right'>
@@ -47,7 +47,7 @@
 					</p>
 		</div>
 		<div class="table-responsive" contenteditable="true">
-	  		<table class="table" id="testTable" contenteditable="false">
+	  		<table class="table" contenteditable="false">
 				<thead>
 					<tr contenteditable="false">
 					</tr>
@@ -56,7 +56,7 @@
 					<tr>
 		  				<td class="inputLabel">INPUT</td>
 					  	<td class="input">
-							<input type='text' class="in inputAmount Amount" id='input1' ></input>
+							<input type='text' class="in inputAmount Amount" id='input1'></input>
 						</td>
 
 						<td>
@@ -74,73 +74,9 @@
 							<select class="in curChoice toCur" id='tc1'>
 							</select>
 						</td>
-					</tr>
-				</tbody>
-	  		</table>
-
-		</div>
-	</div>
-
-	<div class="panel panel-default divPost">
-	  	<div class="panel-heading">
-					<p><label class=".paramLabel">QUE HAGO?</label>
-					<select class="in inputAction" id='object1' style='width:50%;float:right'>
-						<option value='flight'>Cambio</option>
-						<option value='travel'>Compro</option>
-						<option value='internet'>Vendo</option>
-					</select>
-					</p>
-					<p><label class=".paramLabel">QUE?</label>
-					<select class="in inputObject" id='object1' style='width:50%;float:right''>
-							<option value='flight'>Avion</option>
-						<option value='travel'>Cupo Viajero</option>
-						<option value='internet'>Cupo Internet</option>
-						<option value='creditcard'>Cupo Credito</option>
-						<option value='other' contenteditable="true">Otro</option>
-					</select>
-					</p>
-					<p><label class=".paramLabel">AL CAMBIO</label>
-					<select class="in rateType curChoice" id='type1' style='width:50%;float:right''>
-						<option value='oficial'>Oficial</option>
-						<option value='sicad'>Sicad</option>
-						<option value='sicad2'>Sicad II</option>
-						<option value='paralelo'>Paralelo</option>
-					</select>
-					</p>
-		</div>
-		<div class="table-responsive" contenteditable="true">
-	  		<table class="table" id="testTable" contenteditable="false">
-				<thead>
-					<tr contenteditable="false">
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-		  				<th>INPUT</th>
-					  	<td class="input">
-							<input type='text' class="in inputAmount Amount" id='input1' ></input>
-						</td>
-
 						<td>
-							<select class="in curChoice fromCur" id='fc1'>
-								<option value='VEF'>VEF</option>
-								<option value='EUR'>EUR</option>
-								<option value='USD'>USD</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-		  				<th>OUTPUT</th> 
-					  	<td>
-							<input type='text' class="outputAmount Amount" id='output1'  readonly style="color=#00FF00">
-							</input>
-						</td>
-						<td>
-							<select class="in curChoice toCur" id='tc1'>
-								<option value='VEF'>VEF</option>
-								<option value='EUR'>EUR</option>
-								<option value='USD'>USD</option>
-							</select>
+							<button type='button' class='btn btn-xs btn-danger bRemoveRow' style="visibility:hidden"><span class='glyphicon glyphicon-trash'></span>
+							</button>
 						</td>
 					</tr>
 				</tbody>
@@ -149,15 +85,21 @@
 		</div>
 	</div>
 
-	<div class="divPost" style="margin-bottom:1cm">
-		<button type="button" class="btn btn-default btn-success" id="bAddRow">
+
+	<div style="margin-bottom:1cm" class="blockPost" align='center'>
+		<button type="button" class="btn btn-default" id="bAddPost">
 			<span class="glyphicon glyphicon-plus"></span>
 		</button>
 	</div> 
 
 </div> 
+
+	<div class="panel panel-default blockTotal">
+		<table class="table" contenteditable="false">
+		</table>			
+	</div> 
 	<div class="footer" style='margin-top:0cm'>			
-		<button type="button" class="btn btn-default btn-success update">Update Rates</button>
+		<button type="button" class="btn btn-default update">Update Rates</button>
 	</div>
 </div>
 
