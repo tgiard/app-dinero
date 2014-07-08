@@ -39,6 +39,10 @@ function getRates(){
 	});
 };
 
+window.onload = function() {
+	getRates(initPage);
+};
+
 $(window).unload(function() {
 	var arr = {};
 	var cVal = '';
@@ -57,11 +61,6 @@ $(window).unload(function() {
 	});
 	$.cookie("arrInput",JSON.stringify(arr));
 });
-
-window.onload = function() {
-	getRates();
-
-};
 
 function constructInputTable(){
 	var cId = -1;

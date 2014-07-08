@@ -34,15 +34,15 @@
 	<div class="panel panel-default divPost blockPost">
 	  	<div class="panel-heading">
 					<p><label>QUE HAGO ?</label>
-					<select class="in inputAction action" style='width:50%;float:right'>
+					<select class="in inputAction action" style='width:50%;float:right' id="inAc">
 					</select>
 					</p>
 					<p><label>QUE ?</label>
-					<select class="in inputObject object" style='width:50%;float:right''>
+					<select class="in inputObject object" style='width:50%;float:right'  id="inOb">
 					</select>
 					</p>
 					<p><label>AL CAMBIO</label>
-					<select class="in rateType" id='type1' style='width:50%;float:right''>
+					<select class="in rateType" id='type1' style='width:50%;float:right' id="raTy">
 					</select>
 					</p>
 		</div>
@@ -55,27 +55,33 @@
 				<tbody>
 					<tr>
 		  				<td class="inputLabel">INPUT</td>
-					  	<td class="input">
-							<input type='text' class="in inputAmount Amount" id='input1'></input>
+					  	<td>
+							<input type='text' class="in inputAmount Amount pos" id="inAm"></input>
 						</td>
 
 						<td>
-							<select class="in curChoice fromCur" id='fc1'>
+							<select class="in curChoice fromCur pos" id="inCu">
 							</select>
 						</td>
 					</tr>
 					<tr>
 		  				<td class="outputLabel">OUTPUT</td> 
 					  	<td>
-							<input type='text' class="outputAmount Amount" id='output1'  readonly>
+							<input type='text' class="outputAmount Amount neg" id="ouAm"  readonly>
 							</input>
 						</td>
 						<td>
-							<select class="in curChoice toCur" id='tc1'>
+							<select class="in curChoice toCur neg" id="toCu">
 							</select>
 						</td>
+					</tr>
+					<tr>
 						<td>
-							<button type='button' class='btn btn-xs btn-danger bRemoveRow' style="visibility:hidden"><span class='glyphicon glyphicon-trash'></span>
+							<button type='button' class="btn btn-xs btn-default bDuplicate" style="visibility:visible"><span class='glyphicon glyphicon-plus'></span>
+							</button>
+						</td>
+						<td>
+							<button type='button' class="btn btn-xs btn-danger bRemoveRow" style="visibility:hidden"><span class='glyphicon glyphicon-trash'></span>
 							</button>
 						</td>
 					</tr>
@@ -100,6 +106,7 @@
 	</div> 
 	<div class="footer" style='margin-top:0cm'>			
 		<button type="button" class="btn btn-default update">Update Rates</button>
+		<button type="button" class="btn btn-default test">test</button>
 	</div>
 </div>
 

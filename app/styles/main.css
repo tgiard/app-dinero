@@ -9,7 +9,7 @@
 body {
     padding-top: 20px;
     padding-bottom: 20px;
-	background-color:#00a2ea;
+	background-color:#99CCFF;
 }
 
 /* Everything but the jumbotron gets side spacing for mobile first views */
@@ -131,6 +131,14 @@ body {
 	border-radius: 5px;
 	padding:10px;
 	background-color:rgba(100,100,100,.5);
+}
+
+.blockTotal .neg{
+	color:white;
+}
+
+.blockTotal .pos{
+	color:white;
 }
 }
 
