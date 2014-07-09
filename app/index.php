@@ -31,69 +31,119 @@
 	</div>
 
 <div class="mainPanel" style="margin-top:0.5cm">
-	<div class="panel panel-default divPost blockPost">
+	<div class="divPost blockPost">
 	  	<div class="panel-heading">
-					<p><label>QUE HAGO ?</label>
-					<select class="in inputAction action" style='width:50%;float:right' id="inAc">
-					</select>
-					</p>
-					<p><label>QUE ?</label>
-					<select class="in inputObject object" style='width:50%;float:right'  id="inOb">
-					</select>
-					</p>
-					<p><label>AL CAMBIO</label>
-					<select class="in rateType" id='type1' style='width:50%;float:right' id="raTy">
-					</select>
-					</p>
+			<button type='button' class="btn btn-xs btn-default bDuplicate" style="visibility:visible">
+				<span class='glyphicon glyphicon-plus'></span>
+			</button>
+			<button type='button' class="btn btn-xs btn-default bRemoveRow" style="visibility:hidden">
+				<span class='glyphicon glyphicon-trash'></span>
+			</button>
 		</div>
-		<div class="table-responsive" contenteditable="true">
-	  		<table class="table" contenteditable="false">
-				<thead>
-					<tr contenteditable="false">
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-		  				<td class="inputLabel">INPUT</td>
-					  	<td>
-							<input type='text' class="in inputAmount Amount pos" id="inAm"></input>
-						</td>
+		<div class="panel-body">
+			<form class="form-horizontal" role="form">
 
-						<td>
-							<select class="in curChoice fromCur pos" id="inCu">
-							</select>
-						</td>
-					</tr>
-					<tr>
-		  				<td class="outputLabel">OUTPUT</td> 
-					  	<td>
-							<input type='text' class="outputAmount Amount neg" id="ouAm"  readonly>
-							</input>
-						</td>
-						<td>
-							<select class="in curChoice toCur neg" id="toCu">
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<button type='button' class="btn btn-xs btn-default bDuplicate" style="visibility:visible"><span class='glyphicon glyphicon-plus'></span>
-							</button>
-						</td>
-						<td>
-							<button type='button' class="btn btn-xs btn-danger bRemoveRow" style="visibility:hidden"><span class='glyphicon glyphicon-trash'></span>
-							</button>
-						</td>
-					</tr>
-				</tbody>
-	  		</table>
+<!--<div class="input-group">
+  <span class="input-group-addon">Action</span>
+  <input type="text" class="form-control " placeholder="username">
+<!--dropdown button--   
+  <div class="input-group-btn">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+      Dropdown
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu">
+      <li><a href="#">Dropdown link</a></li>
+      <li><a href="#">Dropdown link</a></li>
+    </ul>
+  </div>
+</div>-->
+
+<div class="input-group divAction">
+  <span class="input-group-addon">Action</span>
+  <input type="text" class="form-control  inputAction" placeholder="action" readonly>
+<!--dropdown button-->
+  <div class="input-group-btn">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu">
+    </ul>
+  </div>
+</div>
+
+<div class="input-group divObject">
+  <span class="input-group-addon">Object</span>
+  <input type="text" class="form-control " placeholder="object" readonly>
+<!--dropdown button-->
+  <div class="input-group-btn">
+    <button type="button" class="btn btn-default dropdown-toggle inputObject" data-toggle="dropdown">
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu">
+    </ul>
+  </div>
+</div>
+
+<div class="input-group divAction">
+  <span class="input-group-addon">Cambio</span>
+  <input type="text" class="form-control " placeholder="type" readonly>
+<!--dropdown button-->
+  <div class="input-group-btn">
+    <button type="button" class="btn btn-default dropdown-toggle inputType" data-toggle="dropdown">
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu">
+    </ul>
+  </div>
+</div>
+				<!--<div class="form-group">
+					<label class="col-sm-2 control-label">Action</label>
+    					<div class="col-sm-10">
+						<select class="in inputAction action form-control" id="inAc">
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">Object</label>
+
+    					<div class="col-sm-10">
+					<select class="in inputObject object form-control" id="inOb">
+					</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">Cambio</label>
+    					<div class="col-sm-10">
+					<select class="in rateType form-control" id="raTy">
+					</select>
+					</div>
+				</div>-->
+				<div class="form-group">
+		  			<label  class="col-sm-2 control-label inputLabel">INPUT</label>
+    					<div class="col-sm-10 input-group-btn">
+      <div class="input-group-addon"><select class="in curChoice fromCur pos form-control btn btn-default" id="inCu"></select></div>
+					
+					<input type='text' class="in inputAmount Amount pos form-control" id="inAm"></input>
+					</div>
+				</div>
+				<div class="form-group">
+		  			<label  class="col-sm-2 control-label outputLabel">OUTPUT</label>
+    					<div class="col-sm-10">
+					<select class="in curChoice toCur neg in form-control" id="toCu"></select>
+					<input type='text' class="outputAmount Amount neg in form-control" id="ouAm" readonly></input>
+					</div>
+				</div>
+
+
+			</form>
 
 		</div>
 	</div>
 
 
 	<div style="margin-bottom:1cm" class="blockPost" align='center'>
-		<button type="button" class="btn btn-default" id="bAddPost">
+		<button type="button" class="btn btn-default" id="bAddPost" style="width:100%">
 			<span class="glyphicon glyphicon-plus"></span>
 		</button>
 	</div> 
@@ -105,9 +155,14 @@
 		</table>			
 	</div> 
 	<div class="footer" style='margin-top:0cm'>			
-		<button type="button" class="btn btn-default update">Update Rates</button>
-		<button type="button" class="btn btn-default test">test</button>
+		<button type="button" class="btn btn-default update">
+			<span class="glyphicon glyphicon-refresh"></span>
+		</button>
+		<button type="button" class="btn btn-default bPrint">
+			<span class="glyphicon glyphicon-print"></span>
+		</button>
 	</div>
+
 </div>
 
 
@@ -146,6 +201,7 @@
 
         <!-- build:js({app,.tmp}) scripts/main.js -->
 	<script src="jquery-cookie/jquery.cookie.js"></script>
+	<script src="printThis-master/printThis.js"></script>
         <script src="scripts/main.js"></script>
         <!-- endbuild -->
 </body>

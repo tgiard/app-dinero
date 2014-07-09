@@ -19,10 +19,44 @@ var rateUSDVEFSicad2 = -1;
 var rateUSDVEFSicad1 = 10.60;
 
 
+
 $(window).unload(function() {
+	$.cookie("arrInput",{});
+	var arr = inputsToJson();
+	$.cookie("arrInput",JSON.stringify(arr));
+	//TODO: le cur select de total table
+});
+
+window.onload = function() {
+	getRates(initPage,refreshInput);	
+};
+
+function initPage(callback){	
+	console.log("\n---------- INIT ----------");
+	createTotalTable();
+	//loadChoices(actionArr,$(".inputAction"),0);
+	//loadChoices(rateTypeArr,$(".rateType"));
+	//loadChoices(curArr,$(".curChoice"));
+	loadChoicesDropdown(actionArr,$(".divAction .dropdown-menu"),0);
+	loadChoicesDropdown(rateTypeArr,$(".divObject .dropdown-menu"));
+	loadChoicesDropdown(curArr,$(".divType .dropdown-menu"));
+//TODO : il lance deux fois changeAction...
+	//$(".inputAction").trigger('change');
+	$('.update').click(updateRates);
+	$('#bAddPost').click(addPost);
+
+
+	$('.bPrint').click(printReport);
+	bindElements();
+
+	if(typeof callback === "function") {
+		callback();
+	};
+};
+
+function inputsToJson(){	
 	var arr = {};
 	var cVal = '';
-	$.cookie("arrInput",{});
 	$.each($(".divPost"),function(i,post){
 		// console.log(i);
 		arr[i]={};
@@ -31,62 +65,86 @@ $(window).unload(function() {
 			arr[i][$(col).attr('id')]=cVal;
 		});
 	});
-	$.cookie("arrInput",JSON.stringify(arr));
-});
-
-window.onload = function() {
-	getRates(initPage,refreshInput);	
-};
+	return arr;
+}
 
 function refreshInput(){
 	var arrInput = JSON.parse($.cookie("arrInput"));
 	var cPost = null;
 	var cEl = null;
-	 console.log("ARRAY INPUT");
-	 console.log(arrInput);
+	 //console.log("ARRAY INPUT");
+	 //console.log(arrInput);
 	$.each(arrInput,function(i,p){
 		if(i>0) addPost();
-		console.log("REFRESH CURRENT POST");
+		//console.log("REFRESH CURRENT POST");
 		cPost = $(".divPost:last");
-		console.log(cPost);		
-		console.log(i);		
-		console.log(p);
+		//console.log(cPost);		
+		//console.log(i);		
+		//console.log(p);
 		$.each(p,function(ie,v){
 			cEl = cPost.find("#"+ie);
-			console.log(cEl);
+			//console.log(cEl);
 			cEl.val(v);	
-			console.log(ie);		
-			console.log(v);
+			//console.log(ie);		
+			//console.log(v);
 		});
 ;	});
 	$.each($(".divPost .inputAmount"),function(i,val){
-		console.log(val);
+		//console.log(val);
 		$(val).trigger("input");
 	});
 	$.each($(".divPost .inputAction"),function(i,val){
-		console.log(val);
-		$(val).trigger("change");
+		//console.log(val);
+		//$(val).trigger("change");
 	});
 }
 
-function initPage(callback){	
-	console.log("\n---------- INIT ----------");
-	createTotalTable();
-	bindElements();
-	loadChoices(actionArr,$(".inputAction"),0);
-	loadChoices(rateTypeArr,$(".rateType"));
-	loadChoices(curArr,$(".curChoice"));
-//TODO : il lance deux fois changeAction...
-	$(".inputAction").trigger('change');
-	$('.update').click(updateRates);
-	$('#bAddPost').click(addPost);
+function arrInputs(){
+	var items = [];
+	items.push( "<table>" );
+	$.each($(".divPost"),function(i,post){
+		items.push( "<tr>" );
+		$.each($(post).find(".in"),function(j,col){
+			if($(col).is("select")){
+				console.log("select");
+				cVal = $(col).find("option:selected").text();
+			}else{
+				console.log("other");
+				cVal = $(col).val();
+			}
+			items.push( "<td>" );
+			items.push(cVal);
+			items.push( "</td>" );
+		});
+		items.push( "</tr>" );
+	});
+	$.each($(".blockTotal tr"),function(i,post){
+		items.push( "<tr>" );
+		$.each($(post).find("td,th"),function(j,col){
+			if($(col).children().is("select")){
+				console.log("select");
+				cVal = $(col).children().find("option:selected").text();
+			}else{
+				console.log("other");
+				cVal = $(col).text();
+			}
+			items.push( "<td>" );
+			items.push(cVal);
+			items.push( "</td>" );
+		});
+		items.push( "</tr>" );
+	});
+	items.push( "</table>" );
+	return items
+};
 
-
-	//$('.test').click();
-
-	if(typeof callback === "function") {
-		callback();
-	};
+function printReport(){
+	console.log("-----TEST-----");
+	var arr = arrInputs().join("");
+	var html = "<div class=toPrint>"+arr+"</div>";
+	console.log(arr);
+	$(html).printThis({pageTitle:"TEST",debug:false,printContainer:false,header: null,formValues:true});
+	console.log("-----END TEST-----");
 };
 
 function unbindElements(){
@@ -101,6 +159,9 @@ function unbindElements(){
 function bindElements(){
 	unbindElements()
 	$(".inputAction").change(changeAction);
+	$(".inputAction").on('input',function(){	
+		changeAction(this);	
+	});
 	$(".inputAmount").on('input',function(){	
 		changeInput(this);	
 	});
@@ -112,6 +173,13 @@ function bindElements(){
 	});
 	$('.bRemoveRow').click(removePost);
 	$('.bDuplicate').click(clonePost);
+
+	    $(".dropdown-menu li a").click(function(){
+		var cInput = $(this).parents("div").children("input");
+		//console.log(cButton);
+	      	$(cInput).val($(this).text());
+		$(cInput).trigger('change');
+	   });
 };
 
 function createTotalTable(){
@@ -226,11 +294,11 @@ display = 1 : show the value on the option and set the index as the value
 display = 0 : show the index on the option and set the value as the value
 */
 
-	// console.log("\n---------- LOADING CHOICES ----------");
-	// console.log("LOCATION : ");
-	// console.log(loc);
-	// console.log("ARRAY : ");
-	// console.log(arr);
+	//console.log("\n---------- LOADING CHOICES ----------");
+	//console.log("LOCATION : ");
+	//console.log(loc);
+	//console.log("ARRAY : ");
+	//console.log(arr);
 	var val = '';
 	var option = '';	
 	var obj = null;
@@ -265,26 +333,74 @@ display = 0 : show the index on the option and set the value as the value
 	// console.log("---------- END LOADING CHOICES ----------\n");
 };
 
+function loadChoicesDropdown(arr,loc,display){
+/*
+display = 2 : show the value on the option and set the value as the value 
+display = 1 : show the value on the option and set the index as the value 
+display = 0 : show the index on the option and set the value as the value
+*/
+
+	console.log("\n---------- LOADING CHOICES ----------");
+	console.log("LOCATION : ");
+	console.log(loc);
+	console.log("ARRAY : ");
+	console.log(arr);
+	var val = '';
+	var option = '';	
+	var obj = null;
+	console.log("*** EMPTYING LOCATION ***");
+	loc.empty();
+	console.log("OPTIONS : ");
+	$.each(arr,function(i,v){
+	console.log(i);
+	console.log(v);
+		switch(display) {
+		    case 0:
+			val = v;
+			option = i;
+			break;
+		    case 1:
+			val = i;
+			option = v;
+			break;
+		    case 2:
+			val = v;
+			option = v;
+			break;
+		    default:
+			val = v;
+			option = v;
+		}
+		console.log("option : "+option+" --- value : "+val);
+		obj = 	"<li><a href='#' value="+val+">"+option+"</a></li>";
+		$(obj).appendTo( loc );
+	});
+	// console.log("---------- END LOADING CHOICES ----------\n");
+};
+
 function changeAction(){
-	// console.log("\n---------- ACTION CHANGED ----------");
+	console.log("\n---------- ACTION CHANGED ----------");
+	console.log(this);
 	var cAction = $(this).val();
+//TODO : pas de texte dans un input donc je dois changer le principe de val + text
+	console.log(cAction);
 	var cKey = actionTypeArr[cAction];
 
-	// console.log("*** OBJECTS ***");
+	console.log("*** OBJECTS ***");
 	var cArr = objectArr[cKey];
 	var cPar = $(this).parents(".divPost");
 	var cLoc = cPar.find(".inputObject");
-	// console.log("type of action : " + cKey);
-	// console.log("LOCATION : ");
-	// console.log(cLoc);
-	// console.log("ARRAY : ");
-	// console.log(cArr);
+	console.log("type of action : " + cKey);
+	console.log("LOCATION : ");
+	console.log(cLoc);
+	console.log("ARRAY : ");
+	console.log(cArr);
 	loadChoices(cArr,cLoc);
 
-	// console.log("*** RATE TYPE NEEDED ? ***");	
+	console.log("*** RATE TYPE NEEDED ? ***");	
 	var cLoc = cPar.find(".rateType");
-	// console.log("LOCATION : ");
-	// console.log(cLoc);
+	console.log("LOCATION : ");
+	console.log(cLoc);
 	if(cKey==divKey){
 		cLoc.prop('disabled', false);
 		cLoc.parent().children("label").css("color", "#000000");
@@ -295,11 +411,11 @@ function changeAction(){
 	};
 
 
-	// console.log("*** LABELS  ***");	
+	console.log("*** LABELS  ***");	
 	var cLoc = cPar.find(".inputLabel");
 	var text = '';
-	// console.log("LOCATION : ");
-	// console.log(cLoc);
+	console.log("LOCATION : ");
+	console.log(cLoc);
 	if(cAction=="buydiv"){
 		text="Compro";
 	}else if(cAction=="selldiv"){
@@ -310,8 +426,8 @@ function changeAction(){
 	cLoc.text(text);
 
 	var cLoc = cPar.find(".outputLabel");
-	// console.log("LOCATION : ");
-	// console.log(cLoc);
+	console.log("LOCATION : ");
+	console.log(cLoc);
 	if(cAction=="buydiv"){
 		text="A";
 	}else if(cAction=="selldiv"){
@@ -360,7 +476,7 @@ function changeAction(){
 		cLoc.addClass("neg");
 	};
 
-	// console.log("*** AMOUNTS  ***");	
+	console.log("*** AMOUNTS  ***");	
 	var cLoc = cPar.find(".outputAmount");
 	if(cKey==divKey){
 		cLoc.css('visibility', 'visible');
@@ -392,7 +508,7 @@ function changeAction(){
 
 
 	updateTotalTable();
-	// console.log("---------- END ACTION CHANGED ----------\n");
+	console.log("---------- END ACTION CHANGED ----------\n");
 };
 
 function changeInput(e){
@@ -434,7 +550,7 @@ function addPost(){
 	$(".mainPanel .divPost:last").after(cClone);
 	// console.log("*** Binding Elements ***")
 	bindElements();
- console.log($(".mainPanel .divPost:last.inputAction"))
+	//console.log($(".mainPanel .divPost:last .inputAction"))
 	$(".mainPanel .divPost:last .inputAction").trigger("change");
 	// console.log("---------- END ADD POST ----------\n");
 };
@@ -514,13 +630,12 @@ function displayRates(){
 
 
 function fillTables(callback){
-	// console.log("filling tables");
+	console.log("filling tables");
 	rates={};
 	var cCur = '';
 	var cType = '';
 	$.each($(".rateType option"),function(key,val){
 		cType=$(val).val()
-// console.log(cType)
 		rates[cType]={};
 	});
 	$.each($(".fromCur option"),function(key,val){
@@ -575,18 +690,12 @@ function fillTables(callback){
 
 function saveRatesToFile(){
 	// console.log("saving to file");
-			var dataString = "jsonObject="+JSON.stringify(rates,null,'\t');
- 
-			$.ajax({
-      			type: "POST",
-      			url: "save.php",
-      			data: dataString,
- 
-      				success: function() {
+			var dataString = JSON.stringify(rates,null,'\t');
+			$.post("saveRates.php",{jsonObject:dataString},function() {
 						alert("Rates saved in file");
 						location.reload();
          				}
-			});
+			);
 			return false;
 };
 
@@ -646,7 +755,10 @@ function getRSS(callback,opt){
 					// console.log(str);	
 					var start = n+strTest.length;
 					rateCOPBOLCu = parseFloat(str.substring(start,start+5));
-					// console.log(rateCOPBOLCu);
+					//console.log(rateCOPBOLCu);
+					    if(typeof callback === "function") {
+						callback(opt);
+					    };
 					return false;
 				};	
 			});
@@ -672,10 +784,7 @@ function getRSS(callback,opt){
 					// console.log(str);	
 					var start = n+strTest.length;
 					rateUSDVEFSicad2 = parseFloat((str.substring(start,start+5).replace(',', '.')));
-					// console.log(rateUSDVEFSicad2);
-					    if(typeof callback === "function") {
-						callback(opt);
-					    };
+					//console.log(rateUSDVEFSicad2);
 					return false;
 				};	
 			});

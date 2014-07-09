@@ -86,42 +86,28 @@ body {
     /* Remove the bottom border on the jumbotron for visual effect */
     .jumbotron {
         border-bottom: 0;
-    }
+}
 
-.select-editable {
-     position:relative;
-     background-color:white;
-     border:solid grey 1px;
-     width:120px;
-     height:18px;
- }
- .select-editable select {
-     position:absolute;
-     top:0px;
-     left:0px;
-     font-size:14px;
-     border:none;
-     width:120px;
-     margin:0;
- }
- .select-editable input {
-     position:absolute;
-     top:0px;
-     left:0px;
-     width:100px;
-     padding:1px;
-     font-size:12px;
-     border:none;
- }
- .select-editable select:focus, .select-editable input:focus {
-     outline:none;
- }
-.blockPost {
-	display:inline-block;
-	width: 60%;
+.blockPost {	
+	width: 50%;
 	margin-left: 0.1cm;
 	margin-right: 0.1cm;
+	margin-top: 10px;
+	background-color:white;
+	border-radius: 5px;
+	border: 1px white solid;
+	background-color:rgba(245,245,245,.5);
 }
+
+.blockPost .panel-heading{
+	background-color:rgba(0,129,155,.5);
+	/*border-radius: 5px;*/
+}
+
+.panel-body{
+	padding:0.2cm;
+}
+
 .blockTotal {
 	margin-top: 100px;
 	margin-left: 40%;
@@ -140,6 +126,24 @@ body {
 .blockTotal .pos{
 	color:white;
 }
+
+select,input{
+	border-radius: 0px;
+	height:30px;
+	color:black;
+	background-color:white;
+	border:1px gray solid;
+	padding:1%;
+}
+
+.col-sm-10{
+	background-color:red;
+}
+
+.input-group-addon{
+	width:30%;
+}
+
 }
 
 
