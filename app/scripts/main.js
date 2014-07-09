@@ -28,18 +28,20 @@ $(window).unload(function() {
 });
 
 window.onload = function() {
-	getRates(initPage,refreshInput);	
+	getRates(initPage,bindElements,refreshInput);	
 };
 
-function initPage(callback){	
+function initPage(callback,cb1,cb2){	
 	console.log("\n---------- INIT ----------");
 	createTotalTable();
 	//loadChoices(actionArr,$(".inputAction"),0);
 	//loadChoices(rateTypeArr,$(".rateType"));
 	//loadChoices(curArr,$(".curChoice"));
 	loadChoicesDropdown(actionArr,$(".divAction .dropdown-menu"),0);
-	loadChoicesDropdown(rateTypeArr,$(".divObject .dropdown-menu"));
-	loadChoicesDropdown(curArr,$(".divType .dropdown-menu"));
+	loadChoicesDropdown(objectArr[divKey],$(".divObject .dropdown-menu"));
+	loadChoicesDropdown(rateTypeArr,$(".divType .dropdown-menu"));
+	loadChoicesDropdown(curArr,$(".divInput .dropdown-menu"));
+	loadChoicesDropdown(curArr,$(".divOutput .dropdown-menu"));
 //TODO : il lance deux fois changeAction...
 	//$(".inputAction").trigger('change');
 	$('.update').click(updateRates);
@@ -47,10 +49,9 @@ function initPage(callback){
 
 
 	$('.bPrint').click(printReport);
-	bindElements();
 
 	if(typeof callback === "function") {
-		callback();
+		callback(cb1,cb2);
 	};
 };
 
@@ -156,7 +157,7 @@ function unbindElements(){
 	$('.bDuplicate').unbind();	
 };
 
-function bindElements(){
+function bindElements(callback,cb1){
 	unbindElements()
 	$(".inputAction").change(changeAction);
 	$(".inputAction").on('input',function(){	
@@ -174,12 +175,24 @@ function bindElements(){
 	$('.bRemoveRow').click(removePost);
 	$('.bDuplicate').click(clonePost);
 
-	    $(".dropdown-menu li a").click(function(){
+	    $(".withoutInput .dropdown-menu li a").click(function(){
 		var cInput = $(this).parents("div").children("input");
-		//console.log(cButton);
+		console.log(cInput);
 	      	$(cInput).val($(this).text());
+	      	$(cInput).attr('name',actionArr[$(this).text()]);
 		$(cInput).trigger('change');
 	   });
+
+	    $(".withInput .dropdown-menu li a").click(function(){
+		var cInput = $(this).parent().parent().parent().find(".dropdownLabel");
+		console.log(cInput);
+	      	$(cInput).text($(this).text());
+		$(cInput).trigger('change');
+	   });
+
+	if(typeof callback === "function") {
+		callback(cb1);
+	};
 };
 
 function createTotalTable(){
@@ -381,7 +394,7 @@ display = 0 : show the index on the option and set the value as the value
 function changeAction(){
 	console.log("\n---------- ACTION CHANGED ----------");
 	console.log(this);
-	var cAction = $(this).val();
+	var cAction = $(this).attr('name');
 //TODO : pas de texte dans un input donc je dois changer le principe de val + text
 	console.log(cAction);
 	var cKey = actionTypeArr[cAction];
@@ -389,25 +402,24 @@ function changeAction(){
 	console.log("*** OBJECTS ***");
 	var cArr = objectArr[cKey];
 	var cPar = $(this).parents(".divPost");
-	var cLoc = cPar.find(".inputObject");
+	var cLoc = cPar.find(".divObject .dropdown-menu");
 	console.log("type of action : " + cKey);
 	console.log("LOCATION : ");
 	console.log(cLoc);
 	console.log("ARRAY : ");
 	console.log(cArr);
-	loadChoices(cArr,cLoc);
+	loadChoicesDropdown(cArr,cLoc);
 
 	console.log("*** RATE TYPE NEEDED ? ***");	
-	var cLoc = cPar.find(".rateType");
+	var cLoc = cPar.find(".divType");
 	console.log("LOCATION : ");
 	console.log(cLoc);
+	console.log(cKey);
+	console.log(divKey);
 	if(cKey==divKey){
-		cLoc.prop('disabled', false);
-		cLoc.parent().children("label").css("color", "#000000");
+		cLoc.css('visibility', 'visible');
 	}else{
-		cLoc.prop('disabled', true);
-		cLoc.parent().find("label").css("color", "#ababab");
-		cLoc.val("Oficial");
+		cLoc.css('visibility', 'hidden');
 	};
 
 
@@ -477,12 +489,15 @@ function changeAction(){
 	};
 
 	console.log("*** AMOUNTS  ***");	
-	var cLoc = cPar.find(".outputAmount");
+	var cLoc = cPar.find(".divOutput");
+	console.log(cLoc);
 	if(cKey==divKey){
 		cLoc.css('visibility', 'visible');
 	}else{
 		cLoc.css('visibility', 'hidden');
-	};
+	};	
+	var cLoc = cPar.find(".outputAmount");
+	console.log(cLoc);
 	if(cAction=="buydiv"){
 		cLoc.removeClass("pos");
 		cLoc.addClass("neg");
@@ -634,12 +649,12 @@ function fillTables(callback){
 	rates={};
 	var cCur = '';
 	var cType = '';
-	$.each($(".rateType option"),function(key,val){
-		cType=$(val).val()
+	$.each($(".divType li a"),function(key,val){
+		cType=$(val).text()
 		rates[cType]={};
 	});
-	$.each($(".fromCur option"),function(key,val){
-		cCur=$(val).val()
+	$.each($(".divInput li a"),function(key,val){
+		cCur=$(val).text()
 		$.each(rates,function(key,val){
 			rates[key][cCur]={};
 		});

@@ -41,7 +41,6 @@
 			</button>
 		</div>
 		<div class="panel-body">
-			<form class="form-horizontal" role="form">
 
 <!--<div class="input-group">
   <span class="input-group-addon">Action</span>
@@ -59,7 +58,7 @@
   </div>
 </div>-->
 
-<div class="input-group divAction">
+<div class="input-group divAction withoutInput">
   <span class="input-group-addon">Action</span>
   <input type="text" class="form-control  inputAction" placeholder="action" readonly>
 <!--dropdown button-->
@@ -72,12 +71,12 @@
   </div>
 </div>
 
-<div class="input-group divObject">
+<div class="input-group divObject withoutInput">
   <span class="input-group-addon">Object</span>
-  <input type="text" class="form-control " placeholder="object" readonly>
+  <input type="text" class="form-control inputObject" placeholder="object" readonly>
 <!--dropdown button-->
   <div class="input-group-btn">
-    <button type="button" class="btn btn-default dropdown-toggle inputObject" data-toggle="dropdown">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
       <span class="caret"></span>
     </button>
     <ul class="dropdown-menu">
@@ -85,41 +84,47 @@
   </div>
 </div>
 
-<div class="input-group divAction">
+<div class="input-group divType withoutInput">
   <span class="input-group-addon">Cambio</span>
-  <input type="text" class="form-control " placeholder="type" readonly>
+  <input type="text" class="form-control inputType" placeholder="type" readonly>
 <!--dropdown button-->
   <div class="input-group-btn">
-    <button type="button" class="btn btn-default dropdown-toggle inputType" data-toggle="dropdown">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
       <span class="caret"></span>
     </button>
     <ul class="dropdown-menu">
     </ul>
   </div>
 </div>
-				<!--<div class="form-group">
-					<label class="col-sm-2 control-label">Action</label>
-    					<div class="col-sm-10">
-						<select class="in inputAction action form-control" id="inAc">
-						</select>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-sm-2 control-label">Object</label>
 
-    					<div class="col-sm-10">
-					<select class="in inputObject object form-control" id="inOb">
-					</select>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-sm-2 control-label">Cambio</label>
-    					<div class="col-sm-10">
-					<select class="in rateType form-control" id="raTy">
-					</select>
-					</div>
-				</div>-->
-				<div class="form-group">
+<div class="input-group divInput withInput">
+  <span class="input-group-addon inputLabel">INPUT</span>
+  <input type="text" class="form-control inputAmount" placeholder="type">
+<!--dropdown button-->
+  <div class="input-group-btn">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+	<span class='dropdownLabel'></span>
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu">
+    </ul>
+  </div>
+</div>
+
+<div class="input-group divOutput withInput">
+  <span class="input-group-addon outputLabel">OUTPUT</span>
+  <input type="text" class="form-control outputAmount" placeholder="type" readonly>
+<!--dropdown button-->
+  <div class="input-group-btn">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+	<span class='dropdownLabel'></span>
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu">
+    </ul>
+  </div>
+</div>
+			<!--	<div class="form-group">
 		  			<label  class="col-sm-2 control-label inputLabel">INPUT</label>
     					<div class="col-sm-10 input-group-btn">
       <div class="input-group-addon"><select class="in curChoice fromCur pos form-control btn btn-default" id="inCu"></select></div>
@@ -133,10 +138,9 @@
 					<select class="in curChoice toCur neg in form-control" id="toCu"></select>
 					<input type='text' class="outputAmount Amount neg in form-control" id="ouAm" readonly></input>
 					</div>
-				</div>
+				</div>-->
 
 
-			</form>
 
 		</div>
 	</div>
