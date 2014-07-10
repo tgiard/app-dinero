@@ -1,214 +1,347 @@
 
-$(document).ready(function(){
-
+rates = {};
 var divKey = "divisas";
 var otroKey = "otro";
 var actionTypeArr = {"buydiv":divKey, "selldiv":divKey, "buyany":otroKey};
 var actionArr = {"Compro Divisas":"buydiv", "Vendo Divisas":"selldiv", "Compro ...":"buyany"};
 var objectArr = {};
-objectArr[divKey] = ["Viajero", "Internet", "Tarjeta de creidto","Efectivo"];
+objectArr[divKey] = ["Viajero", "Internet", "Tarjeta de credito","Efectivo"];
 objectArr[otroKey] = ["Avion","Maleta","Otro"];
 var rateTypeArr = ["Oficial","Sicad I","Sicad II","Paralelo"];
 var curArr = ["VEF","USD","EUR"];
-var rates = {};
-var ratesYahoo = {};
-var rssXMLCucuta = "http://feeds.feedburner.com/Bolivarcucuta?format=xml";
-var rssXMLSicad2 = "http://feeds.feedburner.com/DolarSicad?format=xml";
-var rateCOPBOLCu = -1;
-var rateUSDVEFSicad2 = -1;
-var rateUSDVEFSicad1 = 10.60;
+var arrInputs = {};
+var curTot = curArr[0];
 
+// GETTING RATES FROM FILE BEFORE LOADING DOCUMENT
+$.holdReady( true );
+getRates($.holdReady,false);
 
+// READY 
+$(document).ready(function(){
+	console.log(rates);
+	displayRates();
+	createTotalTable();
+	
+	/*BUTTONS BINDING*/
+	$('.update').click(updateRates);
+	$('#bAddPost').click(addPost);
+	$('.bPrint').click(printReport);
+	$(".inputAction").change(changeAction);
+	$('.bRemoveRow').click(removePost);
+	$('.bDuplicate').click(clonePost);
+	
+	/*LOADING DROPDOWNS*/
+	loadChoicesAllDropdown();
+
+	/*BINDING INPUTS*/
+	bindInput();
+	
+	/*GETTING OLD INPUTS*/
+	arrInputs = $.cookie("arrInput");
+	curTot = $.cookie("curTot");
+	console.log(arrInputs);	
+	refreshInput();
+});
 
 $(window).unload(function() {
 	$.cookie("arrInput",{});
 	var arr = inputsToJson();
 	$.cookie("arrInput",JSON.stringify(arr));
+	$.cookie("curTot",$(".curTotal").text());
 	//TODO: le cur select de total table
 });
 
-window.onload = function() {
-	getRates(initPage,bindElements,refreshInput);	
+/*POST MANAGEMENT*/
+function addPost(){
+	// console.log("\n---------- ADD POST ----------");
+	var firstPost = $(".mainPanel .divPost:first");
+	// console.log("*** First Post ***")
+	// console.log(firstPost);
+	var cClone = firstPost.clone(true);
+	cClone.removeData();
+	// console.log("*** Clone Post ***")
+	// console.log(cClone);
+	var bRemove = $(cClone).find(".bRemoveRow");
+	$(bRemove).css('visibility','visible');
+	// console.log("*** Appending To Main Panel ***");
+	$(".mainPanel .divPost:last").after(cClone);
+	// console.log("*** Default Inputs ***");
+	$(".mainPanel .divPost:last .amount").val('');
+	$(".mainPanel .divPost:last .postTitle").val('');
+	$.each($(".mainPanel .divPost:last .dropdown-menu"),function(i,v){
+		$(v).find("li:first").trigger('click');
+	});
+	
+	// console.log("---------- END ADD POST ----------\n");
 };
 
-function initPage(callback,cb1,cb2){	
-	console.log("\n---------- INIT ----------");
-	createTotalTable();
-	//loadChoices(actionArr,$(".inputAction"),0);
-	//loadChoices(rateTypeArr,$(".rateType"));
-	//loadChoices(curArr,$(".curChoice"));
+function removePost(){
+	//console.log("\n---------- REMOVE POST ----------");
+	$(this).parents(".divPost").remove();	
+	updateTotalTable();
+	//console.log("---------- END REMOVE POST ----------\n");
+};
+
+function clonePost(){
+	console.log("\n---------- CLONE POST ----------");
+	var cPost = $(this).parents(".divPost");
+	console.log("*** Target Post ***")
+	console.log(cPost);
+	var cClone = cPost.clone(true);
+	console.log("*** Clone Post ***")
+	console.log(cClone);
+	var cId = -1;
+	var cVal = null;
+	$.each(cClone.find("select"),function(i,v){
+		cId = $(v).attr('id');
+		cVal = cPost.find("select#"+cId).val();
+		$(v).val(cVal);
+	})
+	var bRemove = $(cClone).find(".bRemoveRow");
+	$(bRemove).css('visibility','visible');
+	$(".mainPanel .divPost:last").after(cClone);
+	console.log("---------- END CLONE POST ----------\n");
+};
+/*END POST MANAGEMENT*/
+
+/* DROPDOWN MANAGEMENT*/
+function loadChoicesAllDropdown(){
 	loadChoicesDropdown(actionArr,$(".divAction .dropdown-menu"),0);
 	loadChoicesDropdown(objectArr[divKey],$(".divObject .dropdown-menu"));
 	loadChoicesDropdown(rateTypeArr,$(".divType .dropdown-menu"));
 	loadChoicesDropdown(curArr,$(".divInput .dropdown-menu"));
 	loadChoicesDropdown(curArr,$(".divOutput .dropdown-menu"));
-//TODO : il lance deux fois changeAction...
-	//$(".inputAction").trigger('change');
-	$('.update').click(updateRates);
-	$('#bAddPost').click(addPost);
-
-
-	$('.bPrint').click(printReport);
-
-	if(typeof callback === "function") {
-		callback(cb1,cb2);
-	};
+	loadChoicesDropdown(curArr,$(".blockTotal .dropdown-menu"));
 };
 
-function inputsToJson(){	
-	var arr = {};
-	var cVal = '';
-	$.each($(".divPost"),function(i,post){
-		// console.log(i);
-		arr[i]={};
-		$.each($(post).find(".in"),function(j,col){
-			cVal = $(col).val();
-			arr[i][$(col).attr('id')]=cVal;
-		});
-	});
-	return arr;
-}
+function loadChoicesDropdown(arr,loc,display){
+/*
+display = 2 : show the value on the option and set the value as the value 
+display = 1 : show the value on the option and set the index as the value 
+display = 0 : show the index on the option and set the value as the value
+*/
 
-function refreshInput(){
-	var arrInput = JSON.parse($.cookie("arrInput"));
-	var cPost = null;
-	var cEl = null;
-	 //console.log("ARRAY INPUT");
-	 //console.log(arrInput);
-	$.each(arrInput,function(i,p){
-		if(i>0) addPost();
-		//console.log("REFRESH CURRENT POST");
-		cPost = $(".divPost:last");
-		//console.log(cPost);		
-		//console.log(i);		
-		//console.log(p);
-		$.each(p,function(ie,v){
-			cEl = cPost.find("#"+ie);
-			//console.log(cEl);
-			cEl.val(v);	
-			//console.log(ie);		
-			//console.log(v);
-		});
-;	});
-	$.each($(".divPost .inputAmount"),function(i,val){
-		//console.log(val);
-		$(val).trigger("input");
-	});
-	$.each($(".divPost .inputAction"),function(i,val){
-		//console.log(val);
-		//$(val).trigger("change");
-	});
-}
-
-function arrInputs(){
-	var items = [];
-	items.push( "<table>" );
-	$.each($(".divPost"),function(i,post){
-		items.push( "<tr>" );
-		$.each($(post).find(".in"),function(j,col){
-			if($(col).is("select")){
-				console.log("select");
-				cVal = $(col).find("option:selected").text();
-			}else{
-				console.log("other");
-				cVal = $(col).val();
-			}
-			items.push( "<td>" );
-			items.push(cVal);
-			items.push( "</td>" );
-		});
-		items.push( "</tr>" );
-	});
-	$.each($(".blockTotal tr"),function(i,post){
-		items.push( "<tr>" );
-		$.each($(post).find("td,th"),function(j,col){
-			if($(col).children().is("select")){
-				console.log("select");
-				cVal = $(col).children().find("option:selected").text();
-			}else{
-				console.log("other");
-				cVal = $(col).text();
-			}
-			items.push( "<td>" );
-			items.push(cVal);
-			items.push( "</td>" );
-		});
-		items.push( "</tr>" );
-	});
-	items.push( "</table>" );
-	return items
-};
-
-function printReport(){
-	console.log("-----TEST-----");
-	var arr = arrInputs().join("");
-	var html = "<div class=toPrint>"+arr+"</div>";
+/*	console.log("\n---------- LOADING CHOICES ----------");
+	console.log("LOCATION : ");
+	console.log(loc);
+	console.log("ARRAY : ");
 	console.log(arr);
-	$(html).printThis({pageTitle:"TEST",debug:false,printContainer:false,header: null,formValues:true});
-	console.log("-----END TEST-----");
+*/
+	var val = '';
+	var option = '';	
+	var obj = null;
+	//console.log("*** EMPTYING LOCATION ***");
+	loc.empty();
+	//console.log("OPTIONS : ");
+	$.each(arr,function(i,v){
+	//console.log(i);
+	//console.log(v);
+		switch(display) {
+		    case 0:
+			val = v;
+			option = i;
+			break;
+		    case 1:
+			val = i;
+			option = v;
+			break;
+		    case 2:
+			val = v;
+			option = v;
+			break;
+		    default:
+			val = v;
+			option = v;
+		}
+		//console.log("option : "+option+" --- value : "+val);
+		obj = 	"<li value="+val+">"+option+"</li>";	
+		$(obj).appendTo(loc);
+	});
+	$(loc).find("li").click(function(){
+		//console.log(this);
+		var cInput = $(this).parent().parent().parent().find(".targetDropdown");
+		var cTag = cInput.prop('tagName');
+		//console.log(cTag);
+		//console.log(cInput);
+		if(cTag == 'INPUT')	$(cInput).val($(this).text());
+		else if(cTag == 'SPAN')	$(cInput).text($(this).text());
+		if($(this).parents(".divAction").length==1){
+		      	$(cInput).attr('name',actionArr[$(this).text()]);
+		}
+		$(cInput).trigger('change');
+	});
+	
+	//Trigger click if current value is not in new dropdown list
+	var cVal = null;
+	var cInput = $(loc).find("li").parent().parent().parent().find(".targetDropdown");
+	var cTag = cInput.prop('tagName');
+	if(cTag == 'INPUT') cVal = $(cInput).val();
+	else if(cTag == 'SPAN')	cVal = $(cInput).text();
+	var array =loc.find("li").map(function(){
+               					return $(this).text();
+           				}).get();
+	if($.inArray(cVal,array)==-1)	$(loc).find("li:first").trigger('click');
+	// console.log("---------- END LOADING CHOICES ----------\n");
 };
 
-function unbindElements(){
-	$(".inputAction").unbind();
-	$(".inputAmount").unbind();
-	$(".curChoice").unbind();
-	$(".rateType").unbind();
-	$(".bRemoveRow").unbind();
-	$('.bDuplicate').unbind();	
-};
+function changeAction(){
+	// console.log("\n---------- ACTION CHANGED ----------");
+	// console.log(this);
+	var cAction = $(this).attr('name');
+	// console.log(cAction);
+	var cKey = actionTypeArr[cAction];
 
-function bindElements(callback,cb1){
-	unbindElements()
-	$(".inputAction").change(changeAction);
-	$(".inputAction").on('input',function(){	
-		changeAction(this);	
-	});
-	$(".inputAmount").on('input',function(){	
-		changeInput(this);	
-	});
-	$(".curChoice").change(function(){	
-		changeInput($(this).parents(".divPost").find(".inputAmount"));	
-	});
-	$(".rateType").change(function(){	
-		changeInput($(this).parents(".divPost").find(".inputAmount"));	
-	});
-	$('.bRemoveRow').click(removePost);
-	$('.bDuplicate').click(clonePost);
+	// console.log("*** OBJECTS ***");
+	var cArr = objectArr[cKey];
+	var cPar = $(this).parents(".divPost");
+	var cLoc = cPar.find(".divObject .dropdown-menu");
+	// console.log("type of action : " + cKey);
+	// console.log("LOCATION : ");
+	// console.log(cLoc);
+	// console.log("ARRAY : ");
+	// console.log(cArr);
+	loadChoicesDropdown(cArr,cLoc);
 
-	    $(".withoutInput .dropdown-menu li a").click(function(){
-		var cInput = $(this).parents("div").children("input");
-		console.log(cInput);
-	      	$(cInput).val($(this).text());
-	      	$(cInput).attr('name',actionArr[$(this).text()]);
-		$(cInput).trigger('change');
-	   });
-
-	    $(".withInput .dropdown-menu li a").click(function(){
-		var cInput = $(this).parent().parent().parent().find(".dropdownLabel");
-		console.log(cInput);
-	      	$(cInput).text($(this).text());
-		$(cInput).trigger('change');
-	   });
-
-	if(typeof callback === "function") {
-		callback(cb1);
+	// console.log("*** RATE TYPE NEEDED ? ***");	
+	var cLoc = cPar.find(".divType");
+	// console.log("LOCATION : ");
+	// console.log(cLoc);
+	// console.log(cKey);
+	// console.log(divKey);
+	if(cKey==divKey){
+		cLoc.css('visibility', 'visible');
+	}else{
+		cLoc.css('visibility', 'hidden');
 	};
+
+
+	// console.log("*** LABELS  ***");	
+	var cLoc = cPar.find(".inputLabel");
+	var text = '';
+	// console.log("LOCATION : ");
+	// console.log(cLoc);
+	if(cAction=="buydiv"){
+		text="Compro";
+	}else if(cAction=="selldiv"){
+		text="Vendo";
+	}else if(cAction=="buyany"){
+		text="Precio";
+	};
+	cLoc.text(text);
+
+	var cLoc = cPar.find(".outputLabel");
+	// console.log("LOCATION : ");
+	// console.log(cLoc);
+	if(cAction=="buydiv"){
+		text="A";
+	}else if(cAction=="selldiv"){
+		text="A";
+	}else if(cAction=="buyany"){
+		text="";
+	};
+	cLoc.text(text);
+
+	if(cKey==divKey){
+		cLoc.css('visibility', 'visible');
+	}else{
+		cLoc.css('visibility', 'hidden');
+		cLoc.val("Oficial");
+	};
+
+
+	//console.log("*** SELECT CUR  ***");	
+	var cLoc = cPar.find(".toCur");
+	if(cKey==divKey){
+		cLoc.css('visibility', 'visible');
+	}else{
+		cLoc.css('visibility', 'hidden');
+	};
+
+	if(cAction=="buydiv"){
+		cLoc.removeClass("pos");
+		cLoc.addClass("neg");
+	}else if(cAction=="selldiv"){
+		cLoc.removeClass("neg");
+		cLoc.addClass("pos");
+	}else if(cAction=="buyany"){
+		cLoc.removeClass("neg");
+		cLoc.removeClass("pos");
+	};
+	
+	var cLoc = cPar.find(".fromCur");
+	if(cAction=="buydiv"){
+		cLoc.removeClass("neg");
+		cLoc.addClass("pos");
+	}else if(cAction=="selldiv"){
+		cLoc.removeClass("pos");
+		cLoc.addClass("neg");
+	}else if(cAction=="buyany"){
+		cLoc.removeClass("pos");
+		cLoc.addClass("neg");
+	};
+
+	// console.log("*** AMOUNTS  ***");	
+	var cLoc = cPar.find(".divOutput");
+	// console.log(cLoc);
+	if(cKey==divKey){
+		cLoc.css('visibility', 'visible');
+	}else{
+		cLoc.css('visibility', 'hidden');
+	};	
+	var cLoc = cPar.find(".outputAmount");
+	// console.log(cLoc);
+	if(cAction=="buydiv"){
+		cLoc.removeClass("pos");
+		cLoc.addClass("neg");
+	}else if(cAction=="selldiv"){
+		cLoc.removeClass("neg");
+		cLoc.addClass("pos");
+	}else if(cAction=="buyany"){
+		cLoc.removeClass("neg");
+		cLoc.removeClass("pos");
+	};
+	
+	var cLoc = cPar.find(".inputAmount");
+	if(cAction=="buydiv"){
+		cLoc.removeClass("neg");
+		cLoc.addClass("pos");
+	}else if(cAction=="selldiv"){
+		cLoc.removeClass("pos");
+		cLoc.addClass("neg");
+	}else if(cAction=="buyany"){
+		cLoc.removeClass("pos");
+		cLoc.addClass("neg");
+	};
+
+
+	updateTotalTable();
+	// console.log("---------- END ACTION CHANGED ----------\n");
 };
 
+/*END DROPDOWN MANAGEMENT*/
+
+/*TOTAL TABLE MANAGEMENT*/
 function createTotalTable(){
 	// console.log("\n---------- CREATING TOTAL TABLE ----------");
 	var cDiv = $(".blockTotal table");
 	var html = [];
 	// console.log("table : ");
 	// console.log(cDiv);
-	html.push('<thead><th>CUR</th><th>+</th><th>-</th><th>TOT</th></thead><tbody>');
+	html.push('<thead><th>MONEDA</th><th>+</th><th>-</th><th>TOTAL</th></thead><tbody>');
 	$.each(curArr,function(i,v){
 		html.push('<tr><td class="totCur '+v+'">'+v+'</td><td class="pos '+v+'">---</td><td class="neg '+v+'">---</td><th class="tot '+v+'">---</th></tr>');
 	});
 	html.push('</tbody>');
-	html.push('<tfoot><th>');
-	html.push('<select class="curChoice curTotal"></select>');
-	html.push('</th><th class="pos total">---</th><th class="neg total">---</th><th class="tot total">---</th></tfoot>');
+	html.push('<tfoot><td>');
+	html.push('<div class="input-group-btn">\
+		    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" align="left">\
+			<span class="targetDropdown curTotal curChoice in" id="inCuIn"></span>\
+			<span class="caret"></span>\
+		    </button>\
+		    <ul class="dropdown-menu">\
+		    </ul>\
+		  </div>');
+	html.push('</td><th class="pos total">---</th><th class="neg total">---</th><th class="tot total">---</th></tfoot>');
 	cDiv.append(html.join(''));
 	// console.log("\n---------- END CREATING TOTAL TABLE ----------");
 };
@@ -226,16 +359,46 @@ function updateTotalTable(){
 	// console.log("\n---------- END UPDATING TOTAL TABLE ----------");
 };
 
+function updateColTotIO(pn){
+	var cDiv = $(".blockTotal table");
+	var total = 0;	
+	var cLoc = null;
+	var cVal = '';
+	var cPar = null;
+	var cCur = null;
+	$.each(curArr,function(ic,vc){
+		total = 0;
+		cLoc = cDiv.find("."+pn+"."+vc);
+		//console.log(cLoc);
+		$.each($("input."+pn),function(i,v){
+			//console.log(ic + "-" + i);
+			//console.log(v);	
+			cPar = $(v).parents(".divPost");	
+			cCur = cPar.find(".curChoice."+pn).text();
+			if(cCur==vc){
+				//console.log("Current Cur : "+cCur);
+				cVal = $(v).val();
+				if($.isNumeric(cVal)){	
+					cVal = parseFloat(cVal);
+					//console.log("current "+pn+" : "+cVal);
+					total = total + cVal;
+				};
+			};
+		});
+		cLoc.text(total.toFixed(2));
+	});
+};
+
 
 function updateRowTot(pn){		
 		var cDiv = $(".blockTotal table");
 		var t = 0;
 		var cVal = null; 
-		var targetCur = $(".blockTotal table .curTotal").val(); 
+		var targetCur = $(".blockTotal table .curTotal").text(); 
 		var cCur = null;
 		var cType = 'Paralelo';
 		var cRate = -1;
-		// console.log("TOT CUR : "+targetCur);
+		//console.log("TOT CUR : "+targetCur);
 
 		$.each($(".blockTotal table ."+pn+":not(.total)"),function(i,v){				
 			cVal = $(v).text();
@@ -271,276 +434,162 @@ function updateColTot(){
 	t=cValPos-cValNeg;
 	$(".blockTotal table .tot."+vc).text(t.toFixed(2));
 }
+/*END TOTAL TABLE MANAGEMENT*/
 
-function updateColTotIO(pn){
-	var cDiv = $(".blockTotal table");
-	var total = 0;	
-	var cLoc = null;
+/*HOLDING INPUTS MANAGEMENT*/
+function inputsToJson(){	
+	var arr = {};
 	var cVal = '';
-	var cPar = null;
-	var cCur = null;
-	$.each(curArr,function(ic,vc){
-		total = 0;
-		cLoc = cDiv.find("."+pn+"."+vc);
-		// console.log(cLoc);
-		$.each($("input."+pn),function(i,v){	
-			cPar = $(v).parents(".divPost");	
-			cCur = cPar.find(".curChoice."+pn).val();
-			if(cCur==vc){
-				// console.log("Current Cur : "+cCur);
-				cVal = $(v).val();
-				if($.isNumeric(cVal)){	
-					cVal = parseFloat(cVal);
-					// console.log("current "+pn+" : "+cVal);
-					total = total + cVal;
-				};
-			};
+	var cId = -1;
+	var cTag = null;
+	$.each($(".divPost"),function(i,post){
+		console.log(post);
+		arr[i]={};
+		$.each($(post).find(".in"),function(j,col){
+			console.log("COL");
+			console.log($(col));
+			cTag = $(col).prop('tagName');
+			//console.log(cTag);
+			if(cTag == 'INPUT')	cVal = $(col).val();
+			else if(cTag == 'SPAN')	cVal = $(col).text();
+			console.log("VALUE");
+			console.log(cVal);
+			console.log("ID");
+			cId = $(col).attr('id')
+			console.log(cId);
+			arr[i][cId]=cVal;
 		});
-		cLoc.text(total.toFixed(2));
 	});
-};
+	return arr;
+}
 
-function loadChoices(arr,loc,display){
-/*
-display = 2 : show the value on the option and set the value as the value 
-display = 1 : show the value on the option and set the index as the value 
-display = 0 : show the index on the option and set the value as the value
-*/
-
-	//console.log("\n---------- LOADING CHOICES ----------");
-	//console.log("LOCATION : ");
-	//console.log(loc);
-	//console.log("ARRAY : ");
-	//console.log(arr);
-	var val = '';
-	var option = '';	
-	var obj = null;
-	// console.log("*** EMPTYING LOCATION ***");
-	loc.empty();
-	// console.log("OPTIONS : ");
-	$.each(arr,function(i,v){
-		switch(display) {
-		    case 0:
-			val = v;
-			option = i;
-			break;
-		    case 1:
-			val = i;
-			option = v;
-			break;
-		    case 2:
-			val = v;
-			option = v;
-			break;
-		    default:
-			val = v;
-			option = v;
-		}
-		// console.log("option : "+option+" --- value : "+val);
-		obj = 	$( "<option/>", {
-				value : val,
-	    			html: option
-	  		})
-		obj.appendTo( loc );
+function refreshInput(){
+	$('.curTotal').text(curTot);
+	var arrInput = JSON.parse($.cookie("arrInput"));
+	var cPost = null;
+	var cEl = null;
+	var cTag = null;
+	 //console.log("ARRAY INPUT");
+	 //console.log(arrInput);
+	$.each(arrInput,function(i,p){
+		if(i>0) addPost();
+		//console.log("REFRESH CURRENT POST");
+		cPost = $(".divPost:last");
+		//console.log(cPost);		
+		//console.log(i);		
+		//console.log(p);
+		$.each(p,function(ie,v){
+			cEl = cPost.find("#"+ie);
+			//console.log(cEl);
+			if($(cEl).hasClass("inputAction")){ 	
+				cEl.attr('name',actionArr[v]);
+			}
+			cTag = cEl.prop('tagName');	
+			if(cTag == 'INPUT')	cEl.val(v);
+			else if(cTag == 'SPAN')	cEl.text(v);
+			//console.log(ie);		
+			//console.log(v);
+		});
+;	});
+	$.each($(".divPost .inputAmount"),function(i,val){
+		//console.log(val);
+		$(val).trigger("input");
 	});
-	// console.log("---------- END LOADING CHOICES ----------\n");
-};
-
-function loadChoicesDropdown(arr,loc,display){
-/*
-display = 2 : show the value on the option and set the value as the value 
-display = 1 : show the value on the option and set the index as the value 
-display = 0 : show the index on the option and set the value as the value
-*/
-
-	console.log("\n---------- LOADING CHOICES ----------");
-	console.log("LOCATION : ");
-	console.log(loc);
-	console.log("ARRAY : ");
-	console.log(arr);
-	var val = '';
-	var option = '';	
-	var obj = null;
-	console.log("*** EMPTYING LOCATION ***");
-	loc.empty();
-	console.log("OPTIONS : ");
-	$.each(arr,function(i,v){
-	console.log(i);
-	console.log(v);
-		switch(display) {
-		    case 0:
-			val = v;
-			option = i;
-			break;
-		    case 1:
-			val = i;
-			option = v;
-			break;
-		    case 2:
-			val = v;
-			option = v;
-			break;
-		    default:
-			val = v;
-			option = v;
-		}
-		console.log("option : "+option+" --- value : "+val);
-		obj = 	"<li><a href='#' value="+val+">"+option+"</a></li>";
-		$(obj).appendTo( loc );
+	$.each($(".divPost .inputAction"),function(i,val){
+		//console.log(val);
+		$(val).trigger("change");
 	});
-	// console.log("---------- END LOADING CHOICES ----------\n");
+}
+
+/*END HOLDING INPUTS MANAGEMENT*/
+
+/*PRINTING MANAGEMENT*/
+function makeArrayInputs(){
+	var cTag = null;
+	var items = [];
+	items.push( "<table class='table'>" );
+	items.push( "<tbody>" );
+	$.each($(".divPost"),function(i,post){
+		items.push( "<tr>" );
+		$.each($(post).find(".in"),function(j,col){
+			cTag = $(col).prop('tagName');	
+			if(cTag == 'INPUT')	cVal=$(col).val();
+			else if(cTag == 'SPAN')	cVal=$(col).text();
+			items.push( "<td>" );
+			if($(col).hasClass('amount')){
+				if($(col).hasClass('neg')){
+					cVal = "-"+cVal;
+				}else if($(col).hasClass('pos')){
+					cVal = "+"+cVal;
+				}else{
+					cVal = "---";
+				}
+			}else if($(col).hasClass('curChoice')&&!$(col).hasClass('neg')&&!$(col).hasClass('pos')){
+					cVal = "---";
+			}
+			items.push(cVal);
+			items.push( "</td>" );
+		});
+		items.push( "</tr>" );
+	});
+	items.push( "</tbody>" );
+	items.push( "</table>" );
+	return items
 };
 
-function changeAction(){
-	console.log("\n---------- ACTION CHANGED ----------");
-	console.log(this);
-	var cAction = $(this).attr('name');
-//TODO : pas de texte dans un input donc je dois changer le principe de val + text
-	console.log(cAction);
-	var cKey = actionTypeArr[cAction];
-
-	console.log("*** OBJECTS ***");
-	var cArr = objectArr[cKey];
-	var cPar = $(this).parents(".divPost");
-	var cLoc = cPar.find(".divObject .dropdown-menu");
-	console.log("type of action : " + cKey);
-	console.log("LOCATION : ");
-	console.log(cLoc);
-	console.log("ARRAY : ");
-	console.log(cArr);
-	loadChoicesDropdown(cArr,cLoc);
-
-	console.log("*** RATE TYPE NEEDED ? ***");	
-	var cLoc = cPar.find(".divType");
-	console.log("LOCATION : ");
-	console.log(cLoc);
-	console.log(cKey);
-	console.log(divKey);
-	if(cKey==divKey){
-		cLoc.css('visibility', 'visible');
-	}else{
-		cLoc.css('visibility', 'hidden');
-	};
-
-
-	console.log("*** LABELS  ***");	
-	var cLoc = cPar.find(".inputLabel");
-	var text = '';
-	console.log("LOCATION : ");
-	console.log(cLoc);
-	if(cAction=="buydiv"){
-		text="Compro";
-	}else if(cAction=="selldiv"){
-		text="Vendo";
-	}else if(cAction=="buyany"){
-		text="Precio";
-	};
-	cLoc.text(text);
-
-	var cLoc = cPar.find(".outputLabel");
-	console.log("LOCATION : ");
-	console.log(cLoc);
-	if(cAction=="buydiv"){
-		text="A";
-	}else if(cAction=="selldiv"){
-		text="A";
-	}else if(cAction=="buyany"){
-		text="";
-	};
-	cLoc.text(text);
-
-	if(cKey==divKey){
-		cLoc.css('visibility', 'visible');
-	}else{
-		cLoc.css('visibility', 'hidden');
-		cLoc.val("Oficial");
-	};
-
-
-	// console.log("*** SELECT CUR  ***");	
-	var cLoc = cPar.find(".toCur");
-	if(cKey==divKey){
-		cLoc.css('visibility', 'visible');
-	}else{
-		cLoc.css('visibility', 'hidden');
-	};
-
-	if(cAction=="buydiv"){
-		cLoc.removeClass("pos");
-		cLoc.addClass("neg");
-	}else if(cAction=="selldiv"){
-		cLoc.removeClass("neg");
-		cLoc.addClass("pos");
-	}else if(cAction=="buyany"){
-		cLoc.removeClass("neg");
-		cLoc.removeClass("pos");
-	};
-	
-	var cLoc = cPar.find(".fromCur");
-	if(cAction=="buydiv"){
-		cLoc.removeClass("neg");
-		cLoc.addClass("pos");
-	}else if(cAction=="selldiv"){
-		cLoc.removeClass("pos");
-		cLoc.addClass("neg");
-	}else if(cAction=="buyany"){
-		cLoc.removeClass("pos");
-		cLoc.addClass("neg");
-	};
-
-	console.log("*** AMOUNTS  ***");	
-	var cLoc = cPar.find(".divOutput");
-	console.log(cLoc);
-	if(cKey==divKey){
-		cLoc.css('visibility', 'visible');
-	}else{
-		cLoc.css('visibility', 'hidden');
-	};	
-	var cLoc = cPar.find(".outputAmount");
-	console.log(cLoc);
-	if(cAction=="buydiv"){
-		cLoc.removeClass("pos");
-		cLoc.addClass("neg");
-	}else if(cAction=="selldiv"){
-		cLoc.removeClass("neg");
-		cLoc.addClass("pos");
-	}else if(cAction=="buyany"){
-		cLoc.removeClass("neg");
-		cLoc.removeClass("pos");
-	};
-	
-	var cLoc = cPar.find(".inputAmount");
-	if(cAction=="buydiv"){
-		cLoc.removeClass("neg");
-		cLoc.addClass("pos");
-	}else if(cAction=="selldiv"){
-		cLoc.removeClass("pos");
-		cLoc.addClass("neg");
-	}else if(cAction=="buyany"){
-		cLoc.removeClass("pos");
-		cLoc.addClass("neg");
-	};
-
-
-	updateTotalTable();
-	console.log("---------- END ACTION CHANGED ----------\n");
+function makeArrayTotal(){
+	var cTag = null;
+	var items = [];
+	items.push( "<table class='table'>" );
+	items.push( "<tbody>" );
+	$.each($(".blockTotal tr"),function(i,post){
+		items.push( "<tr>" );
+		$.each($(post).find("td,th"),function(j,col){
+			if($(col).find(".curTotal").length==1){
+				//console.log("dropdown");
+				cVal = $(col).find(".curTotal").text();
+			}else{
+				//console.log("other");
+				cVal = $(col).text();
+			}
+			items.push( "<td>" );
+			items.push(cVal);
+			items.push( "</td>" );
+		});
+		items.push( "</tr>" );
+	});
+	items.push( "</tbody>" );
+	items.push( "</table>" );
+	return items
 };
 
+function printReport(){
+	console.log("-----PRINT-----");
+	var arrI = makeArrayInputs().join("");
+	var arrT = makeArrayTotal().join("");
+	var html = "<div class=toPrint>"+arrI+arrT+"</div>";
+	$(html).printThis({pageTitle:"TEST",debug:false,printContainer:false,header: null,formValues:true});
+	console.log("-----END PRINT-----");
+};
+/*END PRINTING MANAGEMENT*/
+
+/*INPUT MANAGEMENT*/
 function changeInput(e){
-	//// console.log($(par));
 	var cAmount = $(e).val();
 	var cPar = $(e).parents(".divPost");
+	//console.log(cPar);
 	if($.isNumeric(cAmount)){
-		var cFromCur = cPar.find(".fromCur").val();
-		// console.log("from cur : " + cFromCur);
-		var cToCur = cPar.find(".toCur").val();
-		// console.log("to cur : " + cToCur);
-		var cType = cPar.find(".rateType").val();
-		// console.log("type : " + cType);
+		var cFromCur = cPar.find(".fromCur").text();
+		console.log("from cur : " + cFromCur);
+		var cToCur = cPar.find(".toCur").text();
+		console.log("to cur : " + cToCur);
+		var cType = cPar.find(".inputType").val();
+		console.log("type : " + cType);
 		var cRate = rates[cType][cFromCur][cToCur];
-		// console.log(cRate);
+		console.log(cRate);
 		var cOutput = cAmount*cRate;
-		// console.log(cOutput);
+		console.log(cAmount);
+		console.log(cOutput);
 		cPar.find(".outputAmount").val(cOutput.toFixed(2));
 		$(".blockTotal #totalInput").text(cAmount);
 	}else{		
@@ -550,267 +599,15 @@ function changeInput(e){
 	updateTotalTable();
 };
 
-function addPost(){
-	// console.log("\n---------- ADD POST ----------");
-	var firstPost = $(".mainPanel .divPost:first");
-	// console.log("*** First Post ***")
-	// console.log(firstPost);
-	var cClone = firstPost.clone();
-	// console.log("*** Clone Post ***")
-	// console.log(cClone);
-	var bRemove = $(cClone).find(".bRemoveRow");
-	$(bRemove).css('visibility','visible');
-	// console.log("*** Appending To Main Panel ***");
-	cClone.find(".Amount").val('');
-	$(".mainPanel .divPost:last").after(cClone);
-	// console.log("*** Binding Elements ***")
-	bindElements();
-	//console.log($(".mainPanel .divPost:last .inputAction"))
-	$(".mainPanel .divPost:last .inputAction").trigger("change");
-	// console.log("---------- END ADD POST ----------\n");
-};
-
-function removePost(){
-	// console.log("\n---------- REMOVE POST ----------");
-	$(this).parents(".divPost").remove();	
-	updateTotalTable();
-	// console.log("---------- END REMOVE POST ----------\n");
-};
-
-function clonePost(){
-	console.log("\n---------- CLONE POST ----------");
-	var cPost = $(this).parents(".divPost");
-	console.log("*** Target Post ***")
-	console.log(cPost);
-	var cClone = cPost.clone();
-	console.log("*** Clone Post ***")
-	console.log(cClone);
-	var cId = -1;
-	var cVal = null;
-	$.each(cClone.find("select"),function(i,v){
-		cId = $(v).attr('id');
-		cVal = cPost.find("select#"+cId).val();
-		$(v).val(cVal);
-	})
-	var bRemove = $(cClone).find(".bRemoveRow");
-	$(bRemove).css('visibility','visible');
-	$(".mainPanel .divPost:last").after(cClone);
-	console.log("*** Binding Elements ***")
-	bindElements();
-	console.log("---------- END CLONE POST ----------\n");
-};
-
-
-
-
-
-function getRates(callback,cb2){
-	console.log("\n---------- RATES ----------");
-	$.getJSON("../rates.json", function(data){
-		$.each(data, function (index, value) {
-			rates[index]={};
-		    	$.each(value, function (index1, value1) {
-				rates[index][index1]={};
-		    		$.each(value1, function (index2, value2) {
-					rates[index][index1][index2]=value2;
-				})
-			})
-		});
-	}).done(function(){
-		displayRates();
-
-		    if(typeof callback === "function") {
-			callback(cb2);
-		    };
+function bindInput(){	
+	$(".inputAmount").on('input',function(){	
+		changeInput(this);	
+	});	
+	$(".curChoice").change(function(){
+		changeInput($(this).parents(".divPost").find(".inputAmount"));	
+	});
+	$(".inputType").change(function(){	
+		changeInput($(this).parents(".divPost").find(".inputAmount"));	
 	});
 };
-
-function displayRates(){
-	var items = [];
-	items.push("<center>");
-	items.push("$ Paralelo : " + (rates['Paralelo']['USD']['VEF']).toFixed(2)+" ---- ");
-	items.push("$ Sicad I: " + (rates['Sicad I']['USD']['VEF']).toFixed(2)+" ---- "); 
-	items.push("$ Sicad II : " + (rates['Sicad II']['USD']['VEF']).toFixed(2)+" ---- "); 
-	items.push("$ Oficial : " + (rates['Oficial']['USD']['VEF']).toFixed(2)+" ---- ");
-	items.push("€/$ : " + (rates['Oficial']['EUR']['USD']).toFixed(2));
-	items.push("</center>");
-	  	$( "<div/>", {
-	    		"class": "my-new-list",
-	    		html: items.join( "" )
-	  	}).prependTo( ".header" );
-};
-
-
-
-
-
-function fillTables(callback){
-	console.log("filling tables");
-	rates={};
-	var cCur = '';
-	var cType = '';
-	$.each($(".divType li a"),function(key,val){
-		cType=$(val).text()
-		rates[cType]={};
-	});
-	$.each($(".divInput li a"),function(key,val){
-		cCur=$(val).text()
-		$.each(rates,function(key,val){
-			rates[key][cCur]={};
-		});
-	});
-	rates['Oficial']['EUR']['USD']=ratesYahoo['EURUSD'];
-	rates['Oficial']['USD']['EUR']=1/ratesYahoo['EURUSD'];
-	rates['Oficial']['USD']['VEF']=ratesYahoo['USDVEF'];
-	rates['Oficial']['VEF']['USD']=1/ratesYahoo['USDVEF'];
-	rates['Oficial']['EUR']['VEF']=ratesYahoo['EURUSD']*ratesYahoo['USDVEF'];
-	rates['Oficial']['VEF']['EUR']=1/(ratesYahoo['EURUSD']*ratesYahoo['USDVEF']);
-	rates['Oficial']['VEF']['VEF']=1;
-	rates['Oficial']['EUR']['EUR']=1;
-	rates['Oficial']['USD']['USD']=1;
-	$.each(rates['Oficial'],function(key,val){
-		$.each(val,function(key1,val1){
-			rates['Paralelo'][key][key1]=val1;		
-			rates['Sicad I'][key][key1]=val1;
-			rates['Sicad II'][key][key1]=val1;				
-		});	
-	});
-	rates['Paralelo']['USD']['VEF']=ratesYahoo['USDCOP']*1.04/rateCOPBOLCu;
-	rates['Paralelo']['VEF']['USD']=1/rates['Paralelo']['USD']['VEF'];
-	rates['Paralelo']['EUR']['VEF']=rates['Paralelo']['USD']['VEF']*rates['Oficial']['EUR']['USD'];
-	rates['Paralelo']['VEF']['EUR']=1/rates['Paralelo']['EUR']['VEF'];
-
-	rates['Sicad I']['USD']['VEF']=rateUSDVEFSicad1;
-	rates['Sicad I']['VEF']['USD']=1/rates['Sicad I']['USD']['VEF'];
-	rates['Sicad I']['EUR']['VEF']=rateUSDVEFSicad1*ratesYahoo['EURUSD'];
-	rates['Sicad I']['VEF']['EUR']=1/rates['Sicad I']['EUR']['VEF'];
-
-
-	rates['Sicad II']['USD']['VEF']=rateUSDVEFSicad2;
-	rates['Sicad II']['VEF']['USD']=1/rates['Sicad II']['USD']['VEF'];
-	rates['Sicad II']['EUR']['VEF']=rateUSDVEFSicad2*ratesYahoo['EURUSD'];
-	rates['Sicad II']['VEF']['EUR']=1/rates['Sicad II']['EUR']['VEF'];
-//$.each(rates,function(key0,val0){
-//	$.each(val0,function(key,val){
-//		$.each(val,function(key1,val1){
-//			// console.log(key0+"neg"+key+"neg"+key1+" : "+val1);		
-//		});	
-//	});
-//});
-
-    if(typeof callback === "function") {
-        callback();
-    };
-};
-
-function saveRatesToFile(){
-	// console.log("saving to file");
-			var dataString = JSON.stringify(rates,null,'\t');
-			$.post("saveRates.php",{jsonObject:dataString},function() {
-						alert("Rates saved in file");
-						location.reload();
-         				}
-			);
-			return false;
-};
-
-var getExRate = function(arrayCur){
-	//String Currency Construction
-	var r = $.Deferred();
-	var stringCur = "";
-	var nbCur = arrayCur.length;
-	$.each(arrayCur, function(key,value){
-		stringCur = stringCur + "%22" + value + "%22";
-		if(key+1 != nbCur){
-			stringCur = stringCur + "%2C";
-		}
-	});
-
-	//Call to Yahoo Finances
-	var flickerAPI = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20in%20("+stringCur+")&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
-	// console.log("getting ratesYahoo...");
-	  $.getJSON( flickerAPI, {
-	    tags: "test yahoo",
-	    tagmode: "any",
-	    format: "json"
-	  })
-	    	.done(function( data ) {
-			$.each(data.query.results.rate, function(i,val){
-				ratesYahoo[val.id] = parseFloat(val.Rate);
-			});	
-			getRSS(fillTables,saveRatesToFile);		
-			//fillTables(saveRatesToFile);
-	    	})
-	  	.fail(function() {
-	    		// console.log( "error" );
-			return false;
-	  	});
-	// console.log("ratesYahoo ok!");
-};
-
-function getRSS(callback,opt){
-	// console.log('RSS');
-	var url = rssXMLCucuta;
-	var str = '';
-	$.ajax({
-		type: "GET",
-		url: document.location.protocol + '//ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=1000&callback=?&q=' + encodeURIComponent(url),
-		dataType: 'json',
-		error: function(){
-			alert('Unable to load feed, Incorrect path or invalid feed');
-		},
-		success: function(xml){
-			values = xml.responseData.feed.entries;
-			$.each(values,function(key,val){
-				str = val['title'];
-				var n = str.search("Precio del Bolívar");	
-				if(n>=0){
-					var strTest = "Compra: ";
-					n = str.search(strTest);	
-					// console.log(str);	
-					var start = n+strTest.length;
-					rateCOPBOLCu = parseFloat(str.substring(start,start+5));
-					//console.log(rateCOPBOLCu);
-					    if(typeof callback === "function") {
-						callback(opt);
-					    };
-					return false;
-				};	
-			});
-		}
-	});
-	url = rssXMLSicad2;
-	str = '';
-	$.ajax({
-		type: "GET",
-		url: document.location.protocol + '//ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=1000&callback=?&q=' + encodeURIComponent(url),
-		dataType: 'json',
-		error: function(){
-			alert('Unable to load feed, Incorrect path or invalid feed');
-		},
-		success: function(xml){
-			values = xml.responseData.feed.entries;
-			$.each(values,function(key,val){
-				str = val['title'];	
-				var n = str.search("Tasa Sicad 2 cerró");	
-				if(n>=0){
-					var strTest = "BsF. ";
-					n = str.search(strTest);	
-					// console.log(str);	
-					var start = n+strTest.length;
-					rateUSDVEFSicad2 = parseFloat((str.substring(start,start+5).replace(',', '.')));
-					//console.log(rateUSDVEFSicad2);
-					return false;
-				};	
-			});
-		}
-	});
-};
-
-
-function updateRates(){
-	getExRate(["EURUSD","USDVEF","USDCOP"]); 
-};
-
-
-});
+/*END INPUT MANAGEMENT*/

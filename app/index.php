@@ -31,115 +31,92 @@
 	</div>
 
 <div class="mainPanel" style="margin-top:0.5cm">
+
+	<div class="panel panel-default blockTotal">
+		<table class="table" contenteditable="false">
+		</table>			
+	</div> 
+
 	<div class="divPost blockPost">
 	  	<div class="panel-heading">
+			<form class="form-inline" role="form">
 			<button type='button' class="btn btn-xs btn-default bDuplicate" style="visibility:visible">
 				<span class='glyphicon glyphicon-plus'></span>
 			</button>
 			<button type='button' class="btn btn-xs btn-default bRemoveRow" style="visibility:hidden">
 				<span class='glyphicon glyphicon-trash'></span>
 			</button>
+		  	<input type="text" class="form-control postTitle in" placeholder="titulo" id="inTi">
+			</form>
 		</div>
 		<div class="panel-body">
 
-<!--<div class="input-group">
-  <span class="input-group-addon">Action</span>
-  <input type="text" class="form-control " placeholder="username">
-<!--dropdown button--   
-  <div class="input-group-btn">
-    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-      Dropdown
-      <span class="caret"></span>
-    </button>
-    <ul class="dropdown-menu">
-      <li><a href="#">Dropdown link</a></li>
-      <li><a href="#">Dropdown link</a></li>
-    </ul>
-  </div>
-</div>-->
+		<div class="input-group divAction withoutInput">
+		  <span class="input-group-addon inLabel">Accion</span>
+		  <input type="text" class="form-control  inputAction targetDropdown in" placeholder="action" readonly id="inAc">
+		<!--dropdown button-->
+		  <div class="input-group-btn">
+		    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+		      <span class="caret"></span>
+		    </button>
+		    <ul class="dropdown-menu">
+		    </ul>
+		  </div>
+		</div>
 
-<div class="input-group divAction withoutInput">
-  <span class="input-group-addon">Action</span>
-  <input type="text" class="form-control  inputAction" placeholder="action" readonly>
-<!--dropdown button-->
-  <div class="input-group-btn">
-    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-      <span class="caret"></span>
-    </button>
-    <ul class="dropdown-menu">
-    </ul>
-  </div>
-</div>
+		<div class="input-group divObject withoutInput">
+		  <span class="input-group-addon inLabel">Objecto</span>
+		  <input type="text" class="form-control inputObject targetDropdown in" placeholder="object" readonly id="inOb">
+		<!--dropdown button-->
+		  <div class="input-group-btn">
+		    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+		      <span class="caret"></span>
+		    </button>
+		    <ul class="dropdown-menu">
+		    </ul>
+		  </div>
+		</div>
 
-<div class="input-group divObject withoutInput">
-  <span class="input-group-addon">Object</span>
-  <input type="text" class="form-control inputObject" placeholder="object" readonly>
-<!--dropdown button-->
-  <div class="input-group-btn">
-    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-      <span class="caret"></span>
-    </button>
-    <ul class="dropdown-menu">
-    </ul>
-  </div>
-</div>
+		<div class="input-group divType withoutInput">
+		  <span class="input-group-addon inLabel">Cambio</span>
+		  <input type="text" class="form-control inputType targetDropdown in" placeholder="type" readonly id="inTy">
+		<!--dropdown button-->
+		  <div class="input-group-btn">
+		    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+		      <span class="caret"></span>
+		    </button>
+		    <ul class="dropdown-menu">
+		    </ul>
+		  </div>
+		</div>
 
-<div class="input-group divType withoutInput">
-  <span class="input-group-addon">Cambio</span>
-  <input type="text" class="form-control inputType" placeholder="type" readonly>
-<!--dropdown button-->
-  <div class="input-group-btn">
-    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-      <span class="caret"></span>
-    </button>
-    <ul class="dropdown-menu">
-    </ul>
-  </div>
-</div>
+		<div class="input-group divInput withInput">
+		  <span class="input-group-addon inputLabel inLabel">INPUT</span>
+		  <input type="text" class="form-control inputAmount in amount" placeholder="0" id="inIn">
+		<!--dropdown button-->
+		  <div class="input-group-btn">
+		    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+			<span class="targetDropdown fromCur curChoice in" id="inCuIn"></span>
+			<span class="caret"></span>
+		    </button>
+		    <ul class="dropdown-menu">
+		    </ul>
+		  </div>
+		</div>
 
-<div class="input-group divInput withInput">
-  <span class="input-group-addon inputLabel">INPUT</span>
-  <input type="text" class="form-control inputAmount" placeholder="type">
-<!--dropdown button-->
-  <div class="input-group-btn">
-    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-	<span class='dropdownLabel'></span>
-      <span class="caret"></span>
-    </button>
-    <ul class="dropdown-menu">
-    </ul>
-  </div>
-</div>
-
-<div class="input-group divOutput withInput">
-  <span class="input-group-addon outputLabel">OUTPUT</span>
-  <input type="text" class="form-control outputAmount" placeholder="type" readonly>
-<!--dropdown button-->
-  <div class="input-group-btn">
-    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-	<span class='dropdownLabel'></span>
-      <span class="caret"></span>
-    </button>
-    <ul class="dropdown-menu">
-    </ul>
-  </div>
-</div>
-			<!--	<div class="form-group">
-		  			<label  class="col-sm-2 control-label inputLabel">INPUT</label>
-    					<div class="col-sm-10 input-group-btn">
-      <div class="input-group-addon"><select class="in curChoice fromCur pos form-control btn btn-default" id="inCu"></select></div>
-					
-					<input type='text' class="in inputAmount Amount pos form-control" id="inAm"></input>
-					</div>
-				</div>
-				<div class="form-group">
-		  			<label  class="col-sm-2 control-label outputLabel">OUTPUT</label>
-    					<div class="col-sm-10">
-					<select class="in curChoice toCur neg in form-control" id="toCu"></select>
-					<input type='text' class="outputAmount Amount neg in form-control" id="ouAm" readonly></input>
-					</div>
-				</div>-->
-
+		<div class="input-group divOutput withoutInput">
+		  <span class="input-group-addon outputLabel inLabel">OUTPUT</span>
+		  <input type="text" class="form-control outputAmount in amount" placeholder="0" readonly id="inOu">
+		<!--dropdown button-->
+		  <div class="input-group-btn">
+		    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+			<span class="targetDropdown toCur curChoice in" id="inCuOu"></span>
+			<span class="caret"></span>
+		    </button>
+		    <ul class="dropdown-menu">
+		    </ul>
+		  </div>
+		</div>
 
 
 		</div>
@@ -153,11 +130,6 @@
 	</div> 
 
 </div> 
-
-	<div class="panel panel-default blockTotal">
-		<table class="table" contenteditable="false">
-		</table>			
-	</div> 
 	<div class="footer" style='margin-top:0cm'>			
 		<button type="button" class="btn btn-default update">
 			<span class="glyphicon glyphicon-refresh"></span>
@@ -204,6 +176,7 @@
         <!-- endbuild -->
 
         <!-- build:js({app,.tmp}) scripts/main.js -->
+	<script src="scripts/rates.js"></script>
 	<script src="jquery-cookie/jquery.cookie.js"></script>
 	<script src="printThis-master/printThis.js"></script>
         <script src="scripts/main.js"></script>

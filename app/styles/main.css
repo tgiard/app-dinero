@@ -110,7 +110,7 @@ body {
 
 .blockTotal {
 	margin-top: 100px;
-	margin-left: 40%;
+	margin-left: 30%;
 	position:fixed;
 	top:0px;
 	border: 2px solid;
@@ -126,14 +126,21 @@ body {
 .blockTotal .pos{
 	color:white;
 }
-
-select,input{
-	border-radius: 0px;
-	height:30px;
-	color:black;
-	background-color:white;
-	border:1px gray solid;
-	padding:1%;
+.blockTotal:hover{
+ 	cursor:default;
+}
+.blockTotal .input-group-btn .dropdown-toggle{
+	padding:2px;
+	background-color:rgba(255,255,255,1);
+	text-align:center;
+	font-weight:bold;
+	border-radius: 5px;
+}
+.blockTotal .input-group-btn .dropdown-toggle .curTotal{
+	margin-left:0px;
+}
+.blockTotal .input-group-btn .dropdown-toggle .caret{
+	margin-left:0px;
 }
 
 .col-sm-10{
@@ -143,11 +150,34 @@ select,input{
 .input-group-addon{
 	width:30%;
 }
-.input-group-btn{
+.divPost .input-group-btn{
 	width:20%;
 }
-.input-group-btn button{
+.divPost .input-group-btn button{
 	width:100%;
+}
+.divPost .postTitle{
+	width:75%;
+	height:25px;
+}
+.blockTotal .input-group-btn{
+	width:80px;
+}
+.blockTotal .input-group-btn button{
+	width:100%;
+}
+.dropdown-menu li:hover{
+	cursor:pointer;
+	font-weight:bold;
+}
+.divPost .input-group-addon:hover{
+	cursor:default;
+}
+.divPost .withoutInput input:hover{
+	cursor:default;
+}
+.dropdown-menu li{
+	margin-left:10px;
 }
 
 }
