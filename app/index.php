@@ -2,6 +2,69 @@
 
 <!doctype html>
 
+<script type="text/javascript" src="http://code.jquery.com/jquery.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+  $("#register, #login").click(function(e) {
+  var name = ($(event.target).attr('id') == 'register') ? 'Registration' : 'Login';
+  $('#message').slideUp('fast');
+
+  $.post('service.php', 
+      $('#mainform').serialize() +'&action='+ $(event.target).attr('id'), 
+          function(data) {
+    var code = $(data)[0].nodeName.toLowerCase();
+
+    $('#message').removeClass('error');
+    $('#message').removeClass('success');
+    $('#message').addClass(code);
+    if(code == 'success') {
+      $('#message').html(name + ' was successful.');
+    }
+    else if(code == 'error') {
+      var id = parseInt($(data).attr('id'));
+      switch(id) {
+        case 0:
+          $('#message').html('This user name has already been taken. Try some of these suggestions:');
+          form = $(document.createElement('form'));
+          $(data).find('suggestions > suggestion').each(function(idx, el) {
+            radio = $(document.createElement('input'));
+            radio.attr({type: 'radio', name: 'suggested', 
+                id: 'suggested_'+idx, 
+                value: el.innerHTML});
+    
+            lbl = $(document.createElement('label'));
+            lbl.attr('for', 'suggested_'+idx);
+            lbl.html(el.innerHTML);
+    
+            form.append(radio);
+            form.append(lbl);
+            form.append('');
+          });
+        $('#message').append(form);
+        $('#message form input[type="radio"]').click(function() {
+          $('#username').val($(this).attr('value'));
+        });
+        break;
+      case 1:
+        $('#message').html('The e-mail entered is invalid.');
+        break;
+      case 2:
+        $('#message').html('The user name or password you entered was invalid.');
+        break;
+      case 4:
+        $('#message').html('Could not connect to the DB');
+        break;
+      default:
+        $('#message').html('An error occurred, please try again.');
+      }
+    }
+    $('#message').slideDown('fast');
+  });
+  return e.preventDefault();
+  });
+});
+</script>
+
 <html class="no-js">
     <head>
         <meta charset="utf-8">
@@ -28,6 +91,29 @@
 
 <div class="container">
 	<div class="header">
+<!--		  <div id="message"></div>
+		  <form method="post" id="mainform">
+		    <label for="username">Username</label>
+		    <input type="text" name="username" id="username" value="" />
+
+		    <label for="password">Password</label>
+		    <input type="password" name="password" value="" />
+
+		    <input type="submit" name="action" id="login" value="Log in" />
+
+		    <p>Extra options (registration only)</p>
+
+		    <label for="firstname">First name</label>
+		    <input type="text" name="firstname" value="" />
+
+		    <label for="lastname">Last name</label>
+		    <input type="text" name="lastname" value="" />
+
+		    <label for="email">Email</label>
+		    <input type="text" name="email" value="" />
+
+		    <input type="submit" name="action" id="register" value="Register" />
+		  </form>-->
 	</div>
 
 <div class="mainPanel" style="margin-top:0.5cm">
