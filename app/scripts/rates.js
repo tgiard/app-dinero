@@ -15,16 +15,17 @@ function fillTables(callback){
 	rates={};
 	var cCur = '';
 	var cType = '';
-	$.each($(".divType li a"),function(key,val){
+	$.each($(".divType li"),function(key,val){
 		cType=$(val).text()
 		rates[cType]={};
 	});
-	$.each($(".divInput li a"),function(key,val){
+	$.each($(".divInput li"),function(key,val){
 		cCur=$(val).text()
 		$.each(rates,function(key,val){
 			rates[key][cCur]={};
 		});
 	});
+	console.log(rates);
 	rates['Oficial']['EUR']['USD']=ratesYahoo['EURUSD'];
 	rates['Oficial']['USD']['EUR']=1/ratesYahoo['EURUSD'];
 	rates['Oficial']['USD']['VEF']=ratesYahoo['USDVEF'];
@@ -74,7 +75,7 @@ function saveRatesToFile(){
 			var dataString = JSON.stringify(rates,null,'\t');
 			$.post("saveRates.php",{jsonObject:dataString},function() {
 						alert("Rates saved in file");
-						location.reload();
+						//location.reload();
          				}
 			);
 			return false;
@@ -94,7 +95,7 @@ var getExRate = function(arrayCur){
 
 	//Call to Yahoo Finances
 	var flickerAPI = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20in%20("+stringCur+")&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
-	// console.log("getting ratesYahoo...");
+	console.log("getting ratesYahoo...");
 	  $.getJSON( flickerAPI, {
 	    tags: "test yahoo",
 	    tagmode: "any",
@@ -104,6 +105,7 @@ var getExRate = function(arrayCur){
 			$.each(data.query.results.rate, function(i,val){
 				ratesYahoo[val.id] = parseFloat(val.Rate);
 			});	
+			console.log(ratesYahoo);
 			getRSSBol(getRSSSic,fillTables,saveRatesToFile);		
 			//fillTables(saveRatesToFile);
 	    	})
@@ -115,7 +117,7 @@ var getExRate = function(arrayCur){
 };
 
 function getRSSBol(callback,opt1,opt2){
-	// console.log('RSS');
+	console.log('RSS');
 	var url = rssXMLCucuta;
 	var str = '';
 	$.ajax({
@@ -133,10 +135,10 @@ function getRSSBol(callback,opt1,opt2){
 				if(n>=0){
 					var strTest = "Compra: ";
 					n = str.search(strTest);	
-					// console.log(str);	
+					console.log(str);	
 					var start = n+strTest.length;
 					rateCOPBOLCu = parseFloat(str.substring(start,start+5));
-					//console.log(rateCOPBOLCu);
+					console.log(rateCOPBOLCu);
 					    if(typeof callback === "function") {
 						callback(opt1,opt2);
 					    };
@@ -148,7 +150,7 @@ function getRSSBol(callback,opt1,opt2){
 };
 
 function getRSSSic(callback,opt){
-	// console.log('RSS');
+	console.log('RSS');
 	var url = rssXMLSicad2;
 	var str = '';
 	$.ajax({
@@ -166,10 +168,10 @@ function getRSSSic(callback,opt){
 				if(n>=0){
 					var strTest = "BsF. ";
 					n = str.search(strTest);	
-					// console.log(str);	
+					console.log(str);	
 					var start = n+strTest.length;
 					rateUSDVEFSicad2 = parseFloat((str.substring(start,start+5).replace(',', '.')));
-					//console.log(rateUSDVEFSicad2);
+					console.log(rateUSDVEFSicad2);
 					    if(typeof callback === "function") {
 						callback(opt);
 					    };

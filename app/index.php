@@ -4,65 +4,6 @@
 
 <script type="text/javascript" src="http://code.jquery.com/jquery.js"></script>
 <script type="text/javascript">
-$(document).ready(function() {
-  $("#register, #login").click(function(e) {
-  var name = ($(event.target).attr('id') == 'register') ? 'Registration' : 'Login';
-  $('#message').slideUp('fast');
-
-  $.post('service.php', 
-      $('#mainform').serialize() +'&action='+ $(event.target).attr('id'), 
-          function(data) {
-    var code = $(data)[0].nodeName.toLowerCase();
-
-    $('#message').removeClass('error');
-    $('#message').removeClass('success');
-    $('#message').addClass(code);
-    if(code == 'success') {
-      $('#message').html(name + ' was successful.');
-    }
-    else if(code == 'error') {
-      var id = parseInt($(data).attr('id'));
-      switch(id) {
-        case 0:
-          $('#message').html('This user name has already been taken. Try some of these suggestions:');
-          form = $(document.createElement('form'));
-          $(data).find('suggestions > suggestion').each(function(idx, el) {
-            radio = $(document.createElement('input'));
-            radio.attr({type: 'radio', name: 'suggested', 
-                id: 'suggested_'+idx, 
-                value: el.innerHTML});
-    
-            lbl = $(document.createElement('label'));
-            lbl.attr('for', 'suggested_'+idx);
-            lbl.html(el.innerHTML);
-    
-            form.append(radio);
-            form.append(lbl);
-            form.append('');
-          });
-        $('#message').append(form);
-        $('#message form input[type="radio"]').click(function() {
-          $('#username').val($(this).attr('value'));
-        });
-        break;
-      case 1:
-        $('#message').html('The e-mail entered is invalid.');
-        break;
-      case 2:
-        $('#message').html('The user name or password you entered was invalid.');
-        break;
-      case 4:
-        $('#message').html('Could not connect to the DB');
-        break;
-      default:
-        $('#message').html('An error occurred, please try again.');
-      }
-    }
-    $('#message').slideDown('fast');
-  });
-  return e.preventDefault();
-  });
-});
 </script>
 
 <html class="no-js">
@@ -80,6 +21,7 @@ $(document).ready(function() {
         <!-- endbuild -->
         <!-- build:css(.tmp) styles/main.css -->
         <link rel="stylesheet" href="styles/main.css">
+        <link rel="stylesheet" href="jquery-ui-1.11.0.custom/jquery-ui.css">
         <!-- endbuild -->	
     </head>
     <body>
@@ -91,7 +33,8 @@ $(document).ready(function() {
 
 <div class="container">
 	<div class="header">
-<!--		  <div id="message"></div>
+
+	  	<!--<div id="message"></div>
 		  <form method="post" id="mainform">
 		    <label for="username">Username</label>
 		    <input type="text" name="username" id="username" value="" />
@@ -114,10 +57,194 @@ $(document).ready(function() {
 
 		    <input type="submit" name="action" id="register" value="Register" />
 		  </form>-->
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title headerTitle" id="myModalLabel">Login</h4>
+      </div>
+      <div class="modal-body">
+		<div id="socialDiv">
+			<div><button type="button" class="btn btn-default">Connect with Facebook</button></div>
+			<div><button type="button" class="btn btn-default">Connect with Google</button></div>
+		</div>
+
+		<div id="loginDiv">
+			<form id="loginForm">
+				<div class="message"></div>
+				<label>Username</label> <input type="text" name="username"><br>
+				<label>Password</label> <input type="password" name="password"><br>
+			</form>	
+
+			<div class="action_btns">
+				<div><button type="button" class="btn btn_red bLogin"  id="login">Login</button></div>
+				<div><a type="button" class="btn btn_red"  id="newUser">New User</a></div>
+			</div>
+	    	</div>
+		<div id="registerDiv">
+			<form id="registerForm">
+				<div class="message"></div>
+				<label>Username</label> <input type="text" name="username"><br>
+				<label>Email Address</label> <input type="email" name="email"><br>
+				<label>Password</label> <input type="password" name="password"><br>
+				<label>Confirm Password</label> <input type="password" name="confirmPassword"><br>
+			</form>
+
+			<div class="action_btns">
+				<div><button type="button" class="btn btn_red bRegister"  id="register">Register</button></div>
+				<div><a type="button" class="btn btn_red"  id="backLogin">Back</a></div>
+			</div>
+	    	</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="loginModal_temp" class="popupContainer" style="display:none;">
+    <header class="popupHeader">
+        <span class="header_title">Login</span>
+        <span class="modal_close"><i class="fa fa-times"><span class="glyphicon glyphicon-remove-circle"></span></i></span>
+    </header>
+ 
+    <section class="popupBody">
+<div class="social_login">
+    <div class="clearfix">
+        <a class="social_box fb" href="#">
+			<span class="icon_title">Connect with Facebook</span>
+	</a> 
+	<a class="social_box google" href="#">
+		<span class="icon_title">Connect with Google</span>
+	</a>
+    </div>
+
+    <div class="centeredText">
+        <span>Or use your Email address</span>
+    </div>
+
+    <div class="action_btns">
+        <div class="one_half">
+            <a class="btn" href="#" id="login_form" name="login_form">Login</a>
+        </div>
+
+        <div class="one_half last">
+            <a class="btn" href="#" id="register_form" name=
+            "register_form">Sign up</a>
+        </div>
+    </div>
+</div>
+    <! -- Here Goes all the Login and signup Forms -->
+<div class="user_login">
+    <form id="loginForm">
+	<div class="message"></div>
+        <label>Username</label> <input type="text" name="username"><br>
+        <label>Password</label> <input type="password" name="password"><br>
+
+        <div class="checkbox">
+            <input id="remember" type="checkbox"> <label for=
+            "remember">Remember me on this computer</label>
+        </div>
+
+        <div class="action_btns">
+            <div class="one_half">
+                <a class="btn back_btn" href="#">Back</a>
+            </div>
+
+            <div class="one_half last">
+                <a class="btn btn_red bLogin"  id="login" href="#">Login</a>
+            </div>
+        </div>
+    </form>
+    
+    <a class="forgot_password" href="#">Forgot password?</a>
+</div>
+
+<div class="user_register">
+    <form id="registerForm">
+	<div class="message"></div>
+        <label>Username</label> <input type="text" name="username"><br>
+        <label>Email Address</label> <input type="email" name="email"><br>
+        <label>Password</label> <input type="password" name="password"><br>
+
+        <div class="checkbox">
+            <input id="send_updates" type="checkbox"> <label for=
+            "send_updates">Send me occasional email updates</label>
+        </div>
+
+        <div class="action_btns">
+            <div class="one_half">
+                <a class="btn back_btn" href="#">Back</a>
+            </div>
+
+            <div class="one_half last">
+                <a class="btn btn_red bRegister" id="register" href="#">Register</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+    </section>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="overwriteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Este proyecto ya existe!</h4>
+      </div>
+      <div class="modal-body">
+        Esta seguro que quiere overwite?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+        <button type="button" class="btn btn-primary bOverwrite">Sí</button>
+      </div>
+    </div>
+  </div>
+</div>
 	</div>
 
 <div class="mainPanel" style="margin-top:0.5cm">
 
+
+<div id='messageLoggin'></div>
+<!--	<div style="margin-bottom:1cm" class="blockPost" align='center'>-->
+<div id="buttonsDiv">
+		<button type="button" class="btn btn-default" id="bAddPost">
+			<span class="glyphicon glyphicon-plus"></span>
+		</button>
+	<!--</div> -->
+		<button type="button" class="btn btn-default bPrint">
+			<span class="glyphicon glyphicon-print"></span>
+		</button>
+		<button type="button" class="btn btn-default bSave">
+			<span class="glyphicon glyphicon-save"></span>
+		</button>
+
+		<button type="button" class="btn btn-default bLog" id="bLogIn">
+			<span class="glyphicon glyphicon-log-in"></span>
+		</button>
+
+		<button type="button" class="btn btn-default bLog" id="bLogOut">
+			<span class="glyphicon glyphicon-log-out"></span>
+		</button>
+
+		<div class="input-group divFiles" id="projectTitle">
+		  <!--<span class="input-group-addon inLabel">Accion</span>-->
+		  <input type="text" class="form-control  inputFile targetDropdown in inputProjectTitle" placeholder="Proyecto" id="inFi">
+		<!--dropdown button-->
+		  <div class="input-group-btn">
+		    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+		      <span class="caret"></span>
+		    </button>
+		    <ul class="dropdown-menu">
+		    </ul>
+		  </div>
+		</div>
+</div>
 	<div class="panel panel-default blockTotal">
 		<table class="table" contenteditable="false">
 		</table>			
@@ -126,9 +253,9 @@ $(document).ready(function() {
 	<div class="divPost blockPost">
 	  	<div class="panel-heading">
 			<form class="form-inline" role="form">
-			<button type='button' class="btn btn-xs btn-default bDuplicate" style="visibility:visible">
+			<!--<button type='button' class="btn btn-xs btn-default bDuplicate" style="visibility:visible">
 				<span class='glyphicon glyphicon-plus'></span>
-			</button>
+			</button>-->
 			<button type='button' class="btn btn-xs btn-default bRemoveRow" style="visibility:hidden">
 				<span class='glyphicon glyphicon-trash'></span>
 			</button>
@@ -209,20 +336,14 @@ $(document).ready(function() {
 	</div>
 
 
-	<div style="margin-bottom:1cm" class="blockPost" align='center'>
-		<button type="button" class="btn btn-default" id="bAddPost" style="width:100%">
-			<span class="glyphicon glyphicon-plus"></span>
-		</button>
-	</div> 
+
 
 </div> 
 	<div class="footer" style='margin-top:0cm'>			
 		<button type="button" class="btn btn-default update">
 			<span class="glyphicon glyphicon-refresh"></span>
 		</button>
-		<button type="button" class="btn btn-default bPrint">
-			<span class="glyphicon glyphicon-print"></span>
-		</button>
+<!--<a id="modal_trigger" href="#modal" class="btn"><span class="glyphicon glyphicon-save"></span></a>-->
 	</div>
 
 </div>
@@ -262,7 +383,10 @@ $(document).ready(function() {
         <!-- endbuild -->
 
         <!-- build:js({app,.tmp}) scripts/main.js -->
+	<script type="text/javascript" src="jquery-ui-1.11.0.custom/jquery-ui.js"></script>
+	<script type="text/javascript" src="jquery.leanModal.min.js"></script>
 	<script src="scripts/rates.js"></script>
+	<script src="scripts/login.js"></script>
 	<script src="jquery-cookie/jquery.cookie.js"></script>
 	<script src="printThis-master/printThis.js"></script>
         <script src="scripts/main.js"></script>

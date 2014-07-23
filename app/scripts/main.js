@@ -1,5 +1,7 @@
 
 rates = {};
+username = 0;
+dataDir = "user_data";
 var divKey = "divisas";
 var otroKey = "otro";
 var actionTypeArr = {"buydiv":divKey, "selldiv":divKey, "buyany":otroKey};
@@ -11,10 +13,14 @@ var rateTypeArr = ["Oficial","Sicad I","Sicad II","Paralelo"];
 var curArr = ["VEF","USD","EUR"];
 var arrInputs = {};
 var curTot = curArr[0];
+var titPro = "";
+
 
 // GETTING RATES FROM FILE BEFORE LOADING DOCUMENT
 $.holdReady( true );
 getRates($.holdReady,false);
+
+
 
 // READY 
 $(document).ready(function(){
@@ -29,26 +35,33 @@ $(document).ready(function(){
 	$(".inputAction").change(changeAction);
 	$('.bRemoveRow').click(removePost);
 	$('.bDuplicate').click(clonePost);
+	$('.bSave').click(saveUserData);
+	$('.bOverwrite').click(saveDataViaPhp);
+	$('#bLogIn').click(function(){
+        		$("#socialDiv").show();
+       			$("#loginDiv").show();
+			$('#registerDiv').hide();
+			$('#loginModal').modal('show');
+        		$(".header_title").text('Login');
+	});
 	
 	/*LOADING DROPDOWNS*/
 	loadChoicesAllDropdown();
+	
+	//CHECK IF LOGGED
+	checkIfLogged(loadSavedFilesToDropdown);
 
 	/*BINDING INPUTS*/
 	bindInput();
 	
 	/*GETTING OLD INPUTS*/
-	arrInputs = $.cookie("arrInput");
 	curTot = $.cookie("curTot");
-	console.log(arrInputs);	
-	refreshInput();
+	titPro = $.cookie("titPro");
+	refreshInputs();
 });
 
 $(window).unload(function() {
-	$.cookie("arrInput",{});
-	var arr = inputsToJson();
-	$.cookie("arrInput",JSON.stringify(arr));
-	$.cookie("curTot",$(".curTotal").text());
-	//TODO: le cur select de total table
+	inputsToCookies();
 });
 
 /*POST MANAGEMENT*/
@@ -114,19 +127,19 @@ function loadChoicesAllDropdown(){
 	loadChoicesDropdown(curArr,$(".blockTotal .dropdown-menu"));
 };
 
-function loadChoicesDropdown(arr,loc,display){
+function loadChoicesDropdown(arr,loc,display,isLoadFile){
 /*
 display = 2 : show the value on the option and set the value as the value 
 display = 1 : show the value on the option and set the index as the value 
 display = 0 : show the index on the option and set the value as the value
 */
 
-/*	console.log("\n---------- LOADING CHOICES ----------");
-	console.log("LOCATION : ");
-	console.log(loc);
-	console.log("ARRAY : ");
-	console.log(arr);
-*/
+	//console.log("\n---------- LOADING CHOICES ----------");
+	//console.log("LOCATION : ");
+	//console.log(loc);
+	//console.log("ARRAY : ");
+	//console.log(arr);
+
 	var val = '';
 	var option = '';	
 	var obj = null;
@@ -161,14 +174,24 @@ display = 0 : show the index on the option and set the value as the value
 		//console.log(this);
 		var cInput = $(this).parent().parent().parent().find(".targetDropdown");
 		var cTag = cInput.prop('tagName');
+		var cText = $(this).text();
 		//console.log(cTag);
 		//console.log(cInput);
-		if(cTag == 'INPUT')	$(cInput).val($(this).text());
-		else if(cTag == 'SPAN')	$(cInput).text($(this).text());
+		if(cTag == 'INPUT')	$(cInput).val(cText);
+		else if(cTag == 'SPAN')	$(cInput).text(cText);
 		if($(this).parents(".divAction").length==1){
-		      	$(cInput).attr('name',actionArr[$(this).text()]);
+		      	$(cInput).attr('name',actionArr[cText]);
 		}
 		$(cInput).trigger('change');
+		if(isLoadFile==1){
+			var cPath = dataDir+"/"+username+"/"+cText+".json";	
+
+			$.getJSON(cPath, function(data){
+				refreshInputs(data);
+			}).done(function(){
+		  		console.log("data loaded");				
+			});
+		}
 	});
 	
 	//Trigger click if current value is not in new dropdown list
@@ -395,6 +418,7 @@ function updateRowTot(pn){
 		var t = 0;
 		var cVal = null; 
 		var targetCur = $(".blockTotal table .curTotal").text(); 
+		if(targetCur == '') targetCur = curArr[0];
 		var cCur = null;
 		var cType = 'Paralelo';
 		var cRate = -1;
@@ -404,10 +428,11 @@ function updateRowTot(pn){
 			cVal = $(v).text();
 			// console.log(cVal);
 			cCur = $(v).parent().find(".totCur").text();
-			// console.log("Current CUR : "+cCur);
-// console.log(rates);
+			//console.log("Current CUR : "+cCur);
+			// console.log(rates);
 			cRate = rates[cType][cCur][targetCur];
 			// console.log("Current Rate : "+cRate);
+			// console.log("Current Type : "+cType);
 			if($.isNumeric(cVal)){	
 				cVal = parseFloat(cVal)*cRate;
 				t = t + cVal;
@@ -437,40 +462,60 @@ function updateColTot(){
 /*END TOTAL TABLE MANAGEMENT*/
 
 /*HOLDING INPUTS MANAGEMENT*/
+
+function inputsToCookies(){	
+	var arr = {};
+	if($.isEmptyObject(arrInputs)){
+		arr = inputsToJson();
+	}else{
+		arr = arrInputs;
+	}
+		$.cookie("arrInput",{});
+		$.cookie("arrInput",JSON.stringify(arr));
+		$.cookie("curTot",$(".curTotal").text());
+		$.cookie("titPro",$(".inputProjectTitle").val());
+
+}
+
 function inputsToJson(){	
 	var arr = {};
 	var cVal = '';
 	var cId = -1;
 	var cTag = null;
 	$.each($(".divPost"),function(i,post){
-		console.log(post);
+		//console.log(post);
 		arr[i]={};
 		$.each($(post).find(".in"),function(j,col){
-			console.log("COL");
-			console.log($(col));
+			//console.log("COL");
+			//console.log($(col));
 			cTag = $(col).prop('tagName');
 			//console.log(cTag);
 			if(cTag == 'INPUT')	cVal = $(col).val();
 			else if(cTag == 'SPAN')	cVal = $(col).text();
-			console.log("VALUE");
-			console.log(cVal);
-			console.log("ID");
+			//console.log("VALUE");
+			//console.log(cVal);
+			//console.log("ID");
 			cId = $(col).attr('id')
-			console.log(cId);
+			//console.log(cId);
 			arr[i][cId]=cVal;
 		});
 	});
 	return arr;
 }
 
-function refreshInput(){
-	$('.curTotal').text(curTot);
-	var arrInput = JSON.parse($.cookie("arrInput"));
+function refreshInputs(arr){
+	
+	if(arr == undefined){ 
+		$('.inputProjectTitle').val(titPro);
+		$('.curTotal').text(curTot);
+	}
+  	var arrInput = arr || JSON.parse($.cookie("arrInput"));
 	var cPost = null;
 	var cEl = null;
 	var cTag = null;
-	 //console.log("ARRAY INPUT");
-	 //console.log(arrInput);
+	 console.log("ARRAY INPUT");
+	 console.log(arrInput);
+	$(".divPost:not(:first)").remove();
 	$.each(arrInput,function(i,p){
 		if(i>0) addPost();
 		//console.log("REFRESH CURRENT POST");
@@ -611,3 +656,74 @@ function bindInput(){
 	});
 };
 /*END INPUT MANAGEMENT*/
+/*SAVE MANAGEMENT*/
+
+function saveUserData(){
+	console.log(username);
+	if(username!=0){
+		var filename = $(".inputProjectTitle").val()+".json";
+		var arrayFiles = $("#projectTitle .dropdown-menu li").map(function(){
+		       					return $(this).text()+".json";
+		   				}).get();
+		if($.inArray(filename,arrayFiles)!=-1){
+			console.log("OVERWRITE?");
+			$('#overwriteModal').modal('show');			    
+		}
+		else saveDataViaPhp();
+		return false;
+	}else{
+		alert("You must be logged in to save data");
+	}
+}
+
+function saveDataViaPhp(){	
+	var filename = $(".inputProjectTitle").val()+".json";
+	var arr = inputsToJson();
+	var dataString = JSON.stringify(arr,null,'\t');
+	var cPath = dataDir+"/"+username+"/"+filename;
+	$.post("saveUserData.php",{jsonObject:dataString,path:cPath},function(data) {
+					if(data==1) console.log("Data saved in file");
+					else if(data==0) console.log("File already exists");					
+				}
+	);
+	$('#overwriteModal').modal('hide');
+	loadSavedFilesToDropdown()
+
+}
+
+function loadSavedFilesToDropdown(){
+console.log("----- LOADING PROJETS TO DROPDOWN -----");
+console.log(username);
+if(username!=0){
+	var cPath = dataDir+"/"+username;
+	var cArr = {};
+	var cLoc = $(".divFiles .dropdown-menu");
+	console.log("*** file list");
+	console.log(cPath);
+	$.post("loadFilesUserData.php",{path:cPath},function(data) {
+					cArr = JSON.parse(data);
+					/*cArr = jQuery.grep(cArr, function( f ) {
+    						var n = f.search(".json");					
+					  	return ( n !== -1 );
+					});*/
+					//console.log(cArr);
+					loadChoicesDropdown(cArr,cLoc,2,1);							
+        			}
+	);
+}else{
+	console.log("not logged");
+}
+
+function loadProject(name){
+	var cPath = dataDir+"/"+username+"/"+name+".json";	
+
+	$.getJSON(cPath, function(data){
+		refreshInputs(data)
+	}).done(function(){
+  		console.log("data loaded");
+	});
+
+}
+}
+
+/*END SAVE MANAGEMENT*/
