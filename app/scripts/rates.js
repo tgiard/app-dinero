@@ -42,7 +42,7 @@ function fillTables(callback){
 			rates['Sicad II'][key][key1]=val1;				
 		});	
 	});
-	rates['Paralelo']['USD']['VEF']=ratesYahoo['USDCOP']*1.04/rateCOPBOLCu;
+	rates['Paralelo']['USD']['VEF']=ratesYahoo['USDCOP']*1.05/rateCOPBOLCu;
 	rates['Paralelo']['VEF']['USD']=1/rates['Paralelo']['USD']['VEF'];
 	rates['Paralelo']['EUR']['VEF']=rates['Paralelo']['USD']['VEF']*rates['Oficial']['EUR']['USD'];
 	rates['Paralelo']['VEF']['EUR']=1/rates['Paralelo']['EUR']['VEF'];

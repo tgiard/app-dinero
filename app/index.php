@@ -21,10 +21,44 @@
         <!-- endbuild -->
         <!-- build:css(.tmp) styles/main.css -->
         <link rel="stylesheet" href="styles/main.css">
-        <link rel="stylesheet" href="jquery-ui-1.11.0.custom/jquery-ui.css">
         <!-- endbuild -->	
     </head>
     <body>
+
+<script>
+  window.fbAsyncInit = function() {
+  FB.init({
+    appId      : '561970107241078',
+    cookie     : true,  // enable cookies to allow the server to access 
+                        // the session
+    xfbml      : true,  // parse social plugins on this page
+    version    : 'v2.0' // use version 2.0
+  });
+
+  // Now that we've initialized the JavaScript SDK, we call 
+  // FB.getLoginStatus().  This function gets the state of the
+  // person visiting this page and can return one of three states to
+  // the callback you provide.  They can be:
+  //
+  // 1. Logged into your app ('connected')
+  // 2. Logged into Facebook, but not your app ('not_authorized')
+  // 3. Not logged into Facebook and can't tell if they are logged into
+  //    your app or not.
+  //
+  // These three cases are handled in the callback function.
+
+  };
+
+  // Load the SDK asynchronously
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+</script>
+<div id="fb-root"></div>
 
         <!--[if lt IE 10]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
@@ -34,29 +68,10 @@
 <div class="container">
 	<div class="header">
 
-	  	<!--<div id="message"></div>
-		  <form method="post" id="mainform">
-		    <label for="username">Username</label>
-		    <input type="text" name="username" id="username" value="" />
 
-		    <label for="password">Password</label>
-		    <input type="password" name="password" value="" />
 
-		    <input type="submit" name="action" id="login" value="Log in" />
 
-		    <p>Extra options (registration only)</p>
-
-		    <label for="firstname">First name</label>
-		    <input type="text" name="firstname" value="" />
-
-		    <label for="lastname">Last name</label>
-		    <input type="text" name="lastname" value="" />
-
-		    <label for="email">Email</label>
-		    <input type="text" name="email" value="" />
-
-		    <input type="submit" name="action" id="register" value="Register" />
-		  </form>-->
+<!-- Modal -->
 <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-sm">
     <div class="modal-content">
@@ -66,128 +81,68 @@
       </div>
       <div class="modal-body">
 		<div id="socialDiv">
-			<div><button type="button" class="btn btn-default">Connect with Facebook</button></div>
-			<div><button type="button" class="btn btn-default">Connect with Google</button></div>
-		</div>
-
-		<div id="loginDiv">
-			<form id="loginForm">
-				<div class="message"></div>
-				<label>Username</label> <input type="text" name="username"><br>
-				<label>Password</label> <input type="password" name="password"><br>
+			<form id="loginSocialButtons" class="" role="form">
+					<button type="button" class="btn btn-default form-control" id="bFacebook">Connect with Facebook</button>
+					<button type="button" class="btn btn-default form-control" id="bGoogle">Connect with Google</button>
 			</form>	
+		</div>
+		<div id="loginDiv">
+			<hr>
+			<form id="loginForm" role="form" class="form-horizontal">
+				<div class="message"><center>Ingrese su correo y su contraseña.</center></div><br>
+  				<div class="form-group">
+					<label class="col-sm-4 control-label">Correo</label> 
+    					<div class="col-sm-8"><input class="form-control" type="email" placeholder="Correo" name="email"></div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-4 control-label">Contraseña</label> 
+					<div class="col-sm-8"><input type="password" name="password" class="form-control" placeholder="Contraseña"></div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-offset-4 col-sm-8">
+						<button type="button" class="btn btn_red bLogin"  id="login">Sign In</button>
+						<a type="button" class="btn btn_red"  id="newUser">New User</a>
+					</div>
+				</div>
 
-			<div class="action_btns">
-				<div><button type="button" class="btn btn_red bLogin"  id="login">Login</button></div>
-				<div><a type="button" class="btn btn_red"  id="newUser">New User</a></div>
-			</div>
+			</form>	
 	    	</div>
 		<div id="registerDiv">
-			<form id="registerForm">
-				<div class="message"></div>
-				<label>Username</label> <input type="text" name="username"><br>
-				<label>Email Address</label> <input type="email" name="email"><br>
-				<label>Password</label> <input type="password" name="password"><br>
-				<label>Confirm Password</label> <input type="password" name="confirmPassword"><br>
+			<form id="registerForm" role="form" class="form-horizontal">
+				<div class="message"><center>Ingrese sus datos.</center></div><br>
+  				<div class="form-group">
+					<label class="col-sm-4 control-label">Nombre (opcional)</label>
+					<div class="col-sm-8"> <input type="text" name="firstname" class="form-control" ></div>
+				</div>
+  				<div class="form-group">
+					<label class="col-sm-4 control-label">Apellido (opcional)</label>
+					<div class="col-sm-8"> <input type="text" name="lastname" class="form-control" ></div>
+				</div>
+  				<div class="form-group">
+					<label class="col-sm-4 control-label">Correo *</label>
+					<div class="col-sm-8"> <input type="email" name="email" class="form-control" ></div>
+				</div>
+  				<div class="form-group">
+					<label class="col-sm-4 control-label">Contraseña *</label>
+					<div class="col-sm-8"> <input type="password" name="password" class="form-control" id="inputPassword" ></div>
+				</div>
+  				<div class="form-group">
+					<label class="col-sm-4 control-label">Confirmar Contraseña *</label>
+					<div class="col-sm-8"> <input type="password" name="confirmPassword" class="form-control" id="confirmationPassword" ></div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-offset-4 col-sm-8">
+						<button type="button" class="btn btn_red bRegister"  id="register">Register</button>
+						<a type="button" class="btn btn_red"  id="backLogin">Back</a>
+					</div>
+				</div>
 			</form>
-
-			<div class="action_btns">
-				<div><button type="button" class="btn btn_red bRegister"  id="register">Register</button></div>
-				<div><a type="button" class="btn btn_red"  id="backLogin">Back</a></div>
-			</div>
 	    	</div>
       </div>
     </div>
   </div>
 </div>
 
-
-<div id="loginModal_temp" class="popupContainer" style="display:none;">
-    <header class="popupHeader">
-        <span class="header_title">Login</span>
-        <span class="modal_close"><i class="fa fa-times"><span class="glyphicon glyphicon-remove-circle"></span></i></span>
-    </header>
- 
-    <section class="popupBody">
-<div class="social_login">
-    <div class="clearfix">
-        <a class="social_box fb" href="#">
-			<span class="icon_title">Connect with Facebook</span>
-	</a> 
-	<a class="social_box google" href="#">
-		<span class="icon_title">Connect with Google</span>
-	</a>
-    </div>
-
-    <div class="centeredText">
-        <span>Or use your Email address</span>
-    </div>
-
-    <div class="action_btns">
-        <div class="one_half">
-            <a class="btn" href="#" id="login_form" name="login_form">Login</a>
-        </div>
-
-        <div class="one_half last">
-            <a class="btn" href="#" id="register_form" name=
-            "register_form">Sign up</a>
-        </div>
-    </div>
-</div>
-    <! -- Here Goes all the Login and signup Forms -->
-<div class="user_login">
-    <form id="loginForm">
-	<div class="message"></div>
-        <label>Username</label> <input type="text" name="username"><br>
-        <label>Password</label> <input type="password" name="password"><br>
-
-        <div class="checkbox">
-            <input id="remember" type="checkbox"> <label for=
-            "remember">Remember me on this computer</label>
-        </div>
-
-        <div class="action_btns">
-            <div class="one_half">
-                <a class="btn back_btn" href="#">Back</a>
-            </div>
-
-            <div class="one_half last">
-                <a class="btn btn_red bLogin"  id="login" href="#">Login</a>
-            </div>
-        </div>
-    </form>
-    
-    <a class="forgot_password" href="#">Forgot password?</a>
-</div>
-
-<div class="user_register">
-    <form id="registerForm">
-	<div class="message"></div>
-        <label>Username</label> <input type="text" name="username"><br>
-        <label>Email Address</label> <input type="email" name="email"><br>
-        <label>Password</label> <input type="password" name="password"><br>
-
-        <div class="checkbox">
-            <input id="send_updates" type="checkbox"> <label for=
-            "send_updates">Send me occasional email updates</label>
-        </div>
-
-        <div class="action_btns">
-            <div class="one_half">
-                <a class="btn back_btn" href="#">Back</a>
-            </div>
-
-            <div class="one_half last">
-                <a class="btn btn_red bRegister" id="register" href="#">Register</a>
-            </div>
-        </div>
-    </form>
-</div>
-
-    </section>
-</div>
-
-<!-- Modal -->
 <div class="modal fade" id="overwriteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-sm">
     <div class="modal-content">
@@ -205,6 +160,43 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="unsavedModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">El proyecto no esta guardado!</h4>
+      </div>
+      <div class="modal-body">
+        Esta seguro que quiere cargar otro proyecto si guardar los datos actuales?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Anular</button>
+        <button type="button" class="btn btn-default bSave bSaveBeforeLoad">Guardar</button>
+        <button type="button" class="btn btn-primary bLoadAnyway">Sí</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Borrar el proyecto</h4>
+      </div>
+      <div class="modal-body">
+        Esta seguro que quiere borrar el proyecto?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Anular</button>
+        <button type="button" class="btn btn-primary bRemoveProject">Sí</button>
+      </div>
+    </div>
+  </div>
+</div>
 	</div>
 
 <div class="mainPanel" style="margin-top:0.5cm">
@@ -213,6 +205,7 @@
 <div id='messageLoggin'></div>
 <!--	<div style="margin-bottom:1cm" class="blockPost" align='center'>-->
 <div id="buttonsDiv">
+
 		<button type="button" class="btn btn-default" id="bAddPost">
 			<span class="glyphicon glyphicon-plus"></span>
 		</button>
@@ -221,7 +214,11 @@
 			<span class="glyphicon glyphicon-print"></span>
 		</button>
 		<button type="button" class="btn btn-default bSave">
-			<span class="glyphicon glyphicon-save"></span>
+			<span class="glyphicon glyphicon-save"><input type="hidden" class="in isSaved" id="inSa"></span>
+		</button>
+		
+		<button type='button' class="btn btn-default bAskRemoveProject">
+			<span class='glyphicon glyphicon-trash'></span>
 		</button>
 
 		<button type="button" class="btn btn-default bLog" id="bLogIn">
@@ -232,7 +229,11 @@
 			<span class="glyphicon glyphicon-log-out"></span>
 		</button>
 
-		<div class="input-group divFiles" id="projectTitle">
+		 <!--<button type="button" class="btn btn-default bLoad">
+		</button>-->
+
+
+		<div class="input-group divProjectsList" id="projectTitle">
 		  <!--<span class="input-group-addon inLabel">Accion</span>-->
 		  <input type="text" class="form-control  inputFile targetDropdown in inputProjectTitle" placeholder="Proyecto" id="inFi">
 		<!--dropdown button-->
@@ -383,13 +384,24 @@
         <!-- endbuild -->
 
         <!-- build:js({app,.tmp}) scripts/main.js -->
-	<script type="text/javascript" src="jquery-ui-1.11.0.custom/jquery-ui.js"></script>
-	<script type="text/javascript" src="jquery.leanModal.min.js"></script>
 	<script src="scripts/rates.js"></script>
 	<script src="scripts/login.js"></script>
+	<script src="scripts/saveData.js"></script>
 	<script src="jquery-cookie/jquery.cookie.js"></script>
 	<script src="printThis-master/printThis.js"></script>
         <script src="scripts/main.js"></script>
         <!-- endbuild -->
+
+    <!-- Place this asynchronous JavaScript just before your </body> tag -->
+<meta name="google-signin-clientid" content="736978599404-d0cuqi4bgrp99lko8oo5to54gnprfq8k.apps.googleusercontent.com" />
+<meta name="google-signin-scope" content="email" />
+<meta name="google-signin-cookiepolicy" content="single_host_origin" />
+    <script type="text/javascript">
+      (function() {
+       var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+       po.src = 'https://apis.google.com/js/client:plusone.js';
+       var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+     })();
+    </script>
 </body>
 </html>

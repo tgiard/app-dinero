@@ -1,6 +1,8 @@
 
 rates = {};
 username = 0;
+userId = -1;
+userFirstname = '';
 dataDir = "user_data";
 var divKey = "divisas";
 var otroKey = "otro";
@@ -14,6 +16,7 @@ var curArr = ["VEF","USD","EUR"];
 var arrInputs = {};
 var curTot = curArr[0];
 var titPro = "";
+var isSaved = -1;
 
 
 // GETTING RATES FROM FILE BEFORE LOADING DOCUMENT
@@ -30,26 +33,27 @@ $(document).ready(function(){
 	
 	/*BUTTONS BINDING*/
 	$('.update').click(updateRates);
-	$('#bAddPost').click(addPost);
+	$('#bAddPost').click(function(){addPost(undefined)});
 	$('.bPrint').click(printReport);
 	$(".inputAction").change(changeAction);
+	$(".inputObject").change(function(){changeSaveStatus(0);});
+	$(".postTitle").on('input',function(){changeSaveStatus(0);});
+	$(".inputProjectTitle").on('input',function(){changeSaveStatus(0);});
 	$('.bRemoveRow').click(removePost);
 	$('.bDuplicate').click(clonePost);
-	$('.bSave').click(saveUserData);
-	$('.bOverwrite').click(saveDataViaPhp);
 	$('#bLogIn').click(function(){
         		$("#socialDiv").show();
        			$("#loginDiv").show();
 			$('#registerDiv').hide();
 			$('#loginModal').modal('show');
-        		$(".header_title").text('Login');
+        		$("#myModalLabel").text('Login');
 	});
 	
 	/*LOADING DROPDOWNS*/
 	loadChoicesAllDropdown();
 	
 	//CHECK IF LOGGED
-	checkIfLogged(loadSavedFilesToDropdown);
+	refreshSession();
 
 	/*BINDING INPUTS*/
 	bindInput();
@@ -57,6 +61,7 @@ $(document).ready(function(){
 	/*GETTING OLD INPUTS*/
 	curTot = $.cookie("curTot");
 	titPro = $.cookie("titPro");
+	isSaved = $.cookie("isSaved");
 	refreshInputs();
 });
 
@@ -65,19 +70,28 @@ $(window).unload(function() {
 });
 
 /*POST MANAGEMENT*/
-function addPost(){
-	// console.log("\n---------- ADD POST ----------");
-	var firstPost = $(".mainPanel .divPost:first");
-	// console.log("*** First Post ***")
-	// console.log(firstPost);
+function addPost(originalPost){
+	console.log("\n---------- ADD POST ----------");
+	var firstPost = originalPost || $(".mainPanel .divPost:first");
+	//console.log("*** First Post ***")
+	//console.log(firstPost);
+	//console.log(originalPost);
 	var cClone = firstPost.clone(true);
 	cClone.removeData();
-	// console.log("*** Clone Post ***")
-	// console.log(cClone);
+	//console.log("*** Clone Post ***")
+	//console.log(cClone);
 	var bRemove = $(cClone).find(".bRemoveRow");
-	$(bRemove).css('visibility','visible');
-	// console.log("*** Appending To Main Panel ***");
-	$(".mainPanel .divPost:last").after(cClone);
+	//console.log("*** Appending To Main Panel ***");
+	var cLast = $(".mainPanel .divPost:last");
+	//console.log(cLast);
+	if(cLast.length==0){	
+		$(".mainPanel").append(cClone);			
+		$(bRemove).css('visibility','hidden');
+	}
+	else{
+		cLast.after(cClone);	
+		$(bRemove).css('visibility','visible');
+	}
 	// console.log("*** Default Inputs ***");
 	$(".mainPanel .divPost:last .amount").val('');
 	$(".mainPanel .divPost:last .postTitle").val('');
@@ -92,6 +106,7 @@ function removePost(){
 	//console.log("\n---------- REMOVE POST ----------");
 	$(this).parents(".divPost").remove();	
 	updateTotalTable();
+	changeSaveStatus(0);
 	//console.log("---------- END REMOVE POST ----------\n");
 };
 
@@ -127,7 +142,7 @@ function loadChoicesAllDropdown(){
 	loadChoicesDropdown(curArr,$(".blockTotal .dropdown-menu"));
 };
 
-function loadChoicesDropdown(arr,loc,display,isLoadFile){
+function loadChoicesDropdown(arr,loc,display,isLoadProjectsList){
 /*
 display = 2 : show the value on the option and set the value as the value 
 display = 1 : show the value on the option and set the index as the value 
@@ -172,38 +187,38 @@ display = 0 : show the index on the option and set the value as the value
 	});
 	$(loc).find("li").click(function(){
 		//console.log(this);
-		var cInput = $(this).parent().parent().parent().find(".targetDropdown");
-		var cTag = cInput.prop('tagName');
-		var cText = $(this).text();
-		//console.log(cTag);
-		//console.log(cInput);
-		if(cTag == 'INPUT')	$(cInput).val(cText);
-		else if(cTag == 'SPAN')	$(cInput).text(cText);
-		if($(this).parents(".divAction").length==1){
-		      	$(cInput).attr('name',actionArr[cText]);
-		}
-		$(cInput).trigger('change');
-		if(isLoadFile==1){
-			var cPath = dataDir+"/"+username+"/"+cText+".json";	
-
-			$.getJSON(cPath, function(data){
-				refreshInputs(data);
-			}).done(function(){
-		  		console.log("data loaded");				
-			});
+		if( isLoadProjectsList!=1 || $('.isSaved').val()==1 ){
+			var cInput = $(this).parent().parent().parent().find(".targetDropdown");
+			var cTag = cInput.prop('tagName');
+			var cText = $(this).text();
+			//console.log(cTag);
+			//console.log(cInput);
+			if(cTag == 'INPUT')	$(cInput).val(cText);
+			else if(cTag == 'SPAN')	$(cInput).text(cText);
+			if($(this).parents(".divAction").length==1){
+			      	$(cInput).attr('name',actionArr[cText]);
+			}
+			$(cInput).trigger('change');
+			if(isLoadProjectsList==1) loadObjects($(this).val());
+		}else if( isLoadProjectsList==1 && $('.isSaved').val()==0 ){
+			$('#unsavedModal').data('currentLi',$(this));
+			$('#unsavedModal').modal('show');	
+			$('#unsavedModal').find('.btn').prop('disabled',false);
 		}
 	});
 	
-	//Trigger click if current value is not in new dropdown list
-	var cVal = null;
-	var cInput = $(loc).find("li").parent().parent().parent().find(".targetDropdown");
-	var cTag = cInput.prop('tagName');
-	if(cTag == 'INPUT') cVal = $(cInput).val();
-	else if(cTag == 'SPAN')	cVal = $(cInput).text();
-	var array =loc.find("li").map(function(){
-               					return $(this).text();
-           				}).get();
-	if($.inArray(cVal,array)==-1)	$(loc).find("li:first").trigger('click');
+	if(isLoadProjectsList!=1){
+		//Trigger click if current value is not in new dropdown list
+		var cVal = null;
+		var cInput = $(loc).find("li").parent().parent().parent().find(".targetDropdown");
+		var cTag = cInput.prop('tagName');
+		if(cTag == 'INPUT') cVal = $(cInput).val();
+		else if(cTag == 'SPAN')	cVal = $(cInput).text();
+		var array =loc.find("li").map(function(){
+		       					return $(this).text();
+		   				}).get();
+		if($.inArray(cVal,array)==-1)	$(loc).find("li:first").trigger('click');
+	}
 	// console.log("---------- END LOADING CHOICES ----------\n");
 };
 
@@ -338,6 +353,7 @@ function changeAction(){
 
 
 	updateTotalTable();
+	changeSaveStatus(0);
 	// console.log("---------- END ACTION CHANGED ----------\n");
 };
 
@@ -474,6 +490,7 @@ function inputsToCookies(){
 		$.cookie("arrInput",JSON.stringify(arr));
 		$.cookie("curTot",$(".curTotal").text());
 		$.cookie("titPro",$(".inputProjectTitle").val());
+		$.cookie("isSaved",$(".isSaved").val());
 
 }
 
@@ -504,26 +521,28 @@ function inputsToJson(){
 }
 
 function refreshInputs(arr){
-	
-	if(arr == undefined){ 
-		$('.inputProjectTitle').val(titPro);
-		$('.curTotal').text(curTot);
-	}
+	console.log("----- REFRESHING INPUTS -----")
   	var arrInput = arr || JSON.parse($.cookie("arrInput"));
 	var cPost = null;
 	var cEl = null;
 	var cTag = null;
-	 console.log("ARRAY INPUT");
-	 console.log(arrInput);
-	$(".divPost:not(:first)").remove();
+	 //console.log("ARRAY INPUT");
+	 //console.log(arrInput);
+	var originalPost = $(".mainPanel .divPost:first").clone(true);
+	$(".divPost").remove();
+	//console.log(arrInput);
+	//console.log(originalPost);
+	if($.isEmptyObject(arrInput))	addPost(originalPost);
 	$.each(arrInput,function(i,p){
-		if(i>0) addPost();
+		addPost(originalPost);
 		//console.log("REFRESH CURRENT POST");
 		cPost = $(".divPost:last");
 		//console.log(cPost);		
 		//console.log(i);		
 		//console.log(p);
 		$.each(p,function(ie,v){
+			//console.log(ie);
+			//console.log(v);
 			cEl = cPost.find("#"+ie);
 			//console.log(cEl);
 			if($(cEl).hasClass("inputAction")){ 	
@@ -544,6 +563,12 @@ function refreshInputs(arr){
 		//console.log(val);
 		$(val).trigger("change");
 	});
+	if(arr == undefined){ 
+		$('.inputProjectTitle').val(titPro);
+		$('.isSaved').val(isSaved);
+		$('.curTotal').text(curTot);
+	}
+	changeSaveStatus($('.isSaved').val())
 }
 
 /*END HOLDING INPUTS MANAGEMENT*/
@@ -641,7 +666,8 @@ function changeInput(e){
 		cPar.find(".outputAmount").val('');
 		$(".blockTotal #totalInput").text('');
 	};
-	updateTotalTable();
+	updateTotalTable();	
+	changeSaveStatus(0);
 };
 
 function bindInput(){	
@@ -656,74 +682,3 @@ function bindInput(){
 	});
 };
 /*END INPUT MANAGEMENT*/
-/*SAVE MANAGEMENT*/
-
-function saveUserData(){
-	console.log(username);
-	if(username!=0){
-		var filename = $(".inputProjectTitle").val()+".json";
-		var arrayFiles = $("#projectTitle .dropdown-menu li").map(function(){
-		       					return $(this).text()+".json";
-		   				}).get();
-		if($.inArray(filename,arrayFiles)!=-1){
-			console.log("OVERWRITE?");
-			$('#overwriteModal').modal('show');			    
-		}
-		else saveDataViaPhp();
-		return false;
-	}else{
-		alert("You must be logged in to save data");
-	}
-}
-
-function saveDataViaPhp(){	
-	var filename = $(".inputProjectTitle").val()+".json";
-	var arr = inputsToJson();
-	var dataString = JSON.stringify(arr,null,'\t');
-	var cPath = dataDir+"/"+username+"/"+filename;
-	$.post("saveUserData.php",{jsonObject:dataString,path:cPath},function(data) {
-					if(data==1) console.log("Data saved in file");
-					else if(data==0) console.log("File already exists");					
-				}
-	);
-	$('#overwriteModal').modal('hide');
-	loadSavedFilesToDropdown()
-
-}
-
-function loadSavedFilesToDropdown(){
-console.log("----- LOADING PROJETS TO DROPDOWN -----");
-console.log(username);
-if(username!=0){
-	var cPath = dataDir+"/"+username;
-	var cArr = {};
-	var cLoc = $(".divFiles .dropdown-menu");
-	console.log("*** file list");
-	console.log(cPath);
-	$.post("loadFilesUserData.php",{path:cPath},function(data) {
-					cArr = JSON.parse(data);
-					/*cArr = jQuery.grep(cArr, function( f ) {
-    						var n = f.search(".json");					
-					  	return ( n !== -1 );
-					});*/
-					//console.log(cArr);
-					loadChoicesDropdown(cArr,cLoc,2,1);							
-        			}
-	);
-}else{
-	console.log("not logged");
-}
-
-function loadProject(name){
-	var cPath = dataDir+"/"+username+"/"+name+".json";	
-
-	$.getJSON(cPath, function(data){
-		refreshInputs(data)
-	}).done(function(){
-  		console.log("data loaded");
-	});
-
-}
-}
-
-/*END SAVE MANAGEMENT*/

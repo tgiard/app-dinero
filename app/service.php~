@@ -8,9 +8,8 @@ define('DATA_DIR', 'user_data');
 if(isset($_POST['username'], $_POST['password'])) {
   extract($_POST);
 
-//$db = mysql_connect(DB_HOST, DB_USERNAME, DB_PASSWORD);
-//die('ok');
-mysql_error()
+$db = mysql_connect(DB_HOST, DB_USERNAME, DB_PASSWORD);
+
 if (!$db) die('Could not connect: ' . mysql_error());
 else mysql_select_db(DB_NAME, $db);
 
@@ -37,12 +36,14 @@ else mysql_select_db(DB_NAME, $db);
       VALUES ('$username', MD5('$password'), '$email')")){
 		session_start();
 		$_SESSION['username'] = $username;
+		//$query = mysql_query("select count(id) from user_auth where username='$username'");
 		mkdir(DATA_DIR."/".$username);
     		die("<success />");
 	}
-	else
+	else{
 		echo('MYSQL QUERY ERROR : ');
 		die('Could not connect: ' . mysql_error());
+	}
   }
   else if($action == 'login') {
     $query = mysql_query("select count(id) from user_auth 
