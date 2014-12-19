@@ -89,7 +89,7 @@ body {
 }
 
 .blockPost {	
-	width: 50%;
+	width: 47%;
 	margin-left: 0.1cm;
 	margin-right: 0.1cm;
 	margin-top: 10px;
@@ -97,10 +97,20 @@ body {
 	border-radius: 5px;
 	border: 1px white solid;
 	background-color:rgba(245,245,245,.5);
+	display : inline-block;
 }
 
 .blockPost .panel-heading{
 	background-color:rgba(0,129,155,.5);
+	/*border-radius: 5px;*/
+}
+
+#messageLoggin{
+	width:100%;
+	padding : 10px;
+	text-align: center;
+	font-weight:bold;
+    font-size: 21px;
 	/*border-radius: 5px;*/
 }
 
@@ -109,14 +119,18 @@ body {
 }
 
 .blockTotal {
-	margin-top: 100px;
-	margin-left: 30%;
-	position:fixed;
-	top:0px;
+	/*position:fixed;*/
 	border: 2px solid;
 	border-radius: 5px;
 	padding:10px;
-	background-color:rgba(100,100,100,.5);
+	background-color:rgba(100,100,100,.5);	
+	width: 48%;
+}
+
+.buttonsAndTotal{
+	display:inline-block;
+	vertical-align: top;
+	margin-top: 0px;
 }
 
 .blockTotal .neg{
@@ -142,7 +156,15 @@ body {
 .blockTotal .input-group-btn .dropdown-toggle .caret{
 	margin-left:0px;
 }
+#logoAndRates{
+	//background-color: red;
+}
 
+.logoAndRates{
+	//background-color: green;
+	display:inline-block;
+	vertical-align: top;
+}
 
 .input-group-addon{
 	width:30%;
@@ -184,6 +206,19 @@ body {
 
 .divFiles{
 	width:50%;
+}
+
+.inputProjectTitle{
+	width:99%;
+}
+
+#buttonsDiv{
+	width:50%;
+}
+
+#buttonsDiv button{
+	width:49%;
+	margin:0;
 }
 }
 
