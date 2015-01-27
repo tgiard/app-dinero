@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="866.078"
+   height="296.59763"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="logo.svg"
+   inkscape:export-filename="/media/thibault/dropbox/Dropbox-private/Dropbox/dinero-app/dinero/logo/logo.png"
+   inkscape:export-xdpi="120"
+   inkscape:export-ydpi="120">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.67180283"
+     inkscape:cx="518.8902"
+     inkscape:cy="311.39748"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     fit-margin-top="1"
+     fit-margin-right="1"
+     fit-margin-bottom="1"
+     fit-margin-left="1"
+     units="cm"
+     inkscape:window-width="1231"
+     inkscape:window-height="1006"
+     inkscape:window-x="1329"
+     inkscape:window-y="18"
+     inkscape:window-maximized="1"
+     showborder="false" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-204.48981,-119.97743)">
+    <path
+       style="fill:#000000"
+       d="m 864.86121,380.69678 c -1.20625,-0.36389 -2.36036,-0.74432 -2.5647,-0.84539 -0.20432,-0.10107 1.83064,-5.66383 4.52215,-12.36167 18.82553,-46.84769 25.35924,-65.13756 24.56304,-68.75959 -0.14369,-0.65364 -1.19873,-0.12615 -31.58226,15.7904 -24.08075,12.61482 -27.85903,14.30049 -43.28414,19.3112 l -16.90033,5.48992 -6.33876,8.45377 c -3.48632,4.64958 -8.4277,10.11676 -10.98083,12.1493 -4.30357,3.42605 -4.78463,3.60435 -6.59713,2.44511 -1.8125,-1.15925 -1.63778,-1.8952 2.39594,-10.09265 l 4.351,-8.84224 -2.94257,-1.72816 c -3.9689,-2.33094 -4.93222,-6.70669 -2.02432,-9.19494 1.18494,-1.01392 2.08737,-2.14863 2.00539,-2.52158 -0.082,-0.37294 -7.98537,-4.88666 -17.56307,-10.03049 -9.57771,-5.14382 -17.53514,-9.90344 -17.68319,-10.57692 -0.14804,-0.67348 2.28373,-3.13352 5.40396,-5.46675 l 5.67313,-4.24223 15.13001,2.23025 c 14.31779,2.11054 15.37,2.12193 19.60022,0.21221 6.06306,-2.73714 5.72205,-2.7757 8.5046,0.96146 1.9618,2.63482 3.46601,3.45107 7.26709,3.94346 l 4.79322,0.62088 25.14228,-16.74418 c 13.82826,-9.20929 30.97346,-20.60913 38.10046,-25.33297 7.12701,-4.72384 14.26114,-9.47349 15.85363,-10.55477 1.59248,-1.08129 2.7541,-2.53435 2.58138,-3.22902 -0.17277,-0.69468 -4.53307,-8.26168 -9.68965,-16.81555 l -9.37562,-15.55249 2.43339,-1.05647 c 1.33836,-0.58106 4.35502,-1.74665 6.70368,-2.5902 l 4.2703,-1.53373 14.603,11.62842 14.60301,11.62843 6.02014,-3.91311 c 3.31108,-2.15222 16.87918,-11.13538 30.15131,-19.96257 36.7102,-24.41568 47.15942,-29.61092 59.29013,-29.47832 3.826,0.0418 9.1139,-0.10416 11.7509,-0.3244 5.4102,-0.45185 9.9098,1.57357 11.6713,5.25376 1.6426,3.43193 -1.4901,8.664 -11.111,18.55686 -6.8855,7.08008 -11.3713,10.31886 -37.80129,27.2931 -38.45557,24.69745 -38.98597,25.06248 -44.12582,30.3678 -2.38325,2.45997 -6.69494,6.29861 -9.58154,8.53029 -4.45266,3.44245 -9.23831,9.75882 -8.82351,11.64578 0.0659,0.29962 1.92373,-0.61488 4.12859,-2.03221 4.77656,-3.07047 8.37026,-2.97547 12.17177,0.32173 3.13964,2.72313 5.81716,10.64892 4.51954,13.37839 -1.12279,2.36171 -13.96664,9.39253 -26.73102,14.63277 l -9.31606,3.82457 -6.89331,12.77794 c -16.27912,30.17618 -26.97227,48.69201 -29.18087,50.52837 -2.81772,2.34282 -4.18478,2.68997 -7.11357,1.80643 z"
+       id="path2996"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:#000000;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="M 752.99056,341.70759 C 698.70485,378.85045 479.22813,402.16284 559.6899,206.77381 450.80001,402.5826 709.59951,395.66933 763.88522,358.52647 z"
+       id="path3000-2"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3788"
+       style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Webdings;-inkscape-font-specification:Webdings"
+       transform="matrix(4.1888886,0,0,4.1888886,-714.55466,-12.107595)"><flowRegion
+         id="flowRegion3790"><rect
+           id="rect3792"
+           width="346.28931"
+           height="178.93369"
+           x="224.19337"
+           y="29.282555"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Webdings;-inkscape-font-specification:Webdings" /></flowRegion><flowPara
+         id="flowPara3794">DIVEX</flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3823"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       transform="matrix(1.4585799,0,0,1.4585799,136.49486,712.40293)"><flowRegion
+         id="flowRegion3825"><rect
+           id="rect3827"
+           width="254.53897"
+           height="244.11925"
+           x="312.59171"
+           y="-285.82806" /></flowRegion><flowPara
+         id="flowPara3829"
+         style="font-size:27.42393494px">€</flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3823-7"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       transform="matrix(1.1265536,0,0,1.1265536,344.58293,626.99245)"><flowRegion
+         id="flowRegion3825-2"><rect
+           id="rect3827-3"
+           width="254.53897"
+           height="244.11925"
+           x="312.59171"
+           y="-285.82806" /></flowRegion><flowPara
+         id="flowPara3829-9"
+         style="font-size:35.50652313px">$</flowPara></flowRoot>  </g>
+</svg>
